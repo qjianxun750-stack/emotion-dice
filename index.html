@@ -1,0 +1,153 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>情绪骰子 - 今天你是什么状态？</title>
+    <link rel="stylesheet" href="css/style.css">
+    <!-- 引入html2canvas用于生成分享图 -->
+    <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <!-- 引入音效控制 -->
+    <script src="js/audio.js"></script>
+    <!-- 引入统计控制 -->
+    <script src="js/stats.js"></script>
+</head>
+<body>
+    <!-- 背景装饰 -->
+    <div class="bg-decoration">
+        <div class="star star-1"></div>
+        <div class="star star-2"></div>
+        <div class="star star-3"></div>
+        <div class="star star-4"></div>
+        <div class="star star-5"></div>
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+    </div>
+
+    <!-- 粒子容器 -->
+    <div class="particles-container" id="particlesContainer"></div>
+
+    <!-- 主容器 -->
+    <div class="container">
+        <!-- 顶部标题 -->
+        <header class="header">
+            <h1 class="title">🎲 情绪骰子</h1>
+            <p class="subtitle">摇一摇，看今天是什么状态</p>
+        </header>
+
+        <!-- 骰子主题切换 -->
+        <div class="dice-selector">
+            <div class="selector-wrapper">
+                <button class="selector-btn prev-btn" onclick="prevDice()">‹</button>
+                <div class="dice-tabs" id="diceTabs">
+                    <!-- 动态生成骰子主题标签 -->
+                </div>
+                <button class="selector-btn next-btn" onclick="nextDice()">›</button>
+            </div>
+        </div>
+
+        <!-- 3D骰子容器 -->
+        <div class="dice-area">
+            <div class="dice-container" id="diceContainer">
+                <div class="dice" id="dice">
+                    <div class="dice-face face-1">
+                        <span class="face-emoji" id="emoji1">🎲</span>
+                        <span class="face-word" id="word1">?</span>
+                    </div>
+                    <div class="dice-face face-2">
+                        <span class="face-emoji" id="emoji2">🎲</span>
+                        <span class="face-word" id="word2">?</span>
+                    </div>
+                    <div class="dice-face face-3">
+                        <span class="face-emoji" id="emoji3">🎲</span>
+                        <span class="face-word" id="word3">?</span>
+                    </div>
+                    <div class="dice-face face-4">
+                        <span class="face-emoji" id="emoji4">🎲</span>
+                        <span class="face-word" id="word4">?</span>
+                    </div>
+                    <div class="dice-face face-5">
+                        <span class="face-emoji" id="emoji5">🎲</span>
+                        <span class="face-word" id="word5">?</span>
+                    </div>
+                    <div class="dice-face face-6">
+                        <span class="face-emoji" id="emoji6">🎲</span>
+                        <span class="face-word" id="word6">?</span>
+                    </div>
+                </div>
+            </div>
+            <p class="dice-hint" id="diceHint">点击骰子摇一摇</p>
+        </div>
+
+        <!-- 结果展示区 -->
+        <div class="result-area" id="resultArea" style="display: none;">
+            <div class="result-card">
+                <div class="result-emoji" id="resultEmoji">😎</div>
+                <h2 class="result-word" id="resultWord">小爷来了</h2>
+                <p class="result-desc" id="resultDesc">今天有气势，冲！</p>
+                
+                <div class="result-actions">
+                    <button class="btn btn-primary" onclick="generateShare()">📸 生成分享图</button>
+                    <button class="btn btn-secondary" onclick="shareResult()">📤 直接分享</button>
+                    <button class="btn btn-secondary" onclick="rollAgain()">🎲 再摇一次</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- 历史记录 -->
+        <div class="history-area">
+            <h3 class="history-title">📝 最近记录</h3>
+            <div class="history-list" id="historyList">
+                <!-- 动态生成历史记录 -->
+            </div>
+        </div>
+
+        <!-- 底部信息 -->
+        <footer class="footer">
+            <p>© 2026 情绪骰子 | 今天你摇了吗？</p>
+            <p style="margin-top: 10px; font-size: 12px;">
+                <a href="admin.html" style="color: white; opacity: 0.6; text-decoration: none;">📊 数据统计</a>
+            </p>
+        </footer>
+    </div>
+
+    <!-- 分享图预览模态框 -->
+    <div class="modal" id="shareModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 id="modalTitle">分享你的情绪</h3>
+                <button class="close-btn" onclick="closeModal()">×</button>
+            </div>
+            <div class="share-preview" id="sharePreview">
+                <!-- 分享图内容或分享选项 -->
+            </div>
+            <div class="modal-actions" id="modalActions">
+                <button class="btn btn-primary" onclick="downloadShare()">💾 保存图片</button>
+                <button class="btn btn-secondary" onclick="closeModal()">关闭</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 隐藏的分享图容器（用于生成图片） -->
+    <div id="shareCanvas" style="position: absolute; left: -9999px; top: -9999px;">
+        <div class="share-card" id="shareCard">
+            <div class="share-header">
+                <div class="share-logo">🎲 情绪骰子</div>
+            </div>
+            <div class="share-body">
+                <div class="share-emoji" id="shareEmoji">😎</div>
+                <h2 class="share-word" id="shareWord">小爷来了</h2>
+                <p class="share-desc" id="shareDesc">今天有气势，冲！</p>
+                <div class="share-dice-name" id="shareDiceName">今日状态骰</div>
+            </div>
+            <div class="share-footer">
+                <div class="share-date" id="shareDate">2026-04-23</div>
+                <div class="share-qrcode">扫码摇骰子</div>
+                <div class="share-link">emotion-dice.vercel.app</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/app.js"></script>
+</body>
+</html>
