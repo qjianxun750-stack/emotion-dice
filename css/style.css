@@ -835,8 +835,8 @@ body::after {
     display: flex;
     gap: 10px;
     justify-content: center;
+    align-items: center;
     margin-top: 20px;
-    padding: 0 20px;
 }
 
 /* 分享图片预览区 */
@@ -849,8 +849,8 @@ body::after {
 }
 
 .share-image-result {
-    max-width: 100%;
-    width: 100%;
+    max-width: 90vw;
+    width: auto;
     max-width: 400px;
     border-radius: 20px;
     box-shadow: 0 10px 40px rgba(0,0,0,0.3);
@@ -1154,7 +1154,7 @@ body::after {
 
 .share-footer {
     border-top: 1px solid rgba(255,255,255,0.3);
-    padding-top: 20px;
+    padding: 25px 30px 30px;
 }
 
 .share-date {
