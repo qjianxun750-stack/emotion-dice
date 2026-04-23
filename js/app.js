@@ -384,10 +384,14 @@ function showShareOptions(text, url) {
 // 复制链接
 function copyShareLink() {
     const url = window.location.href;
-    
+
     if (navigator.clipboard) {
         navigator.clipboard.writeText(url).then(() => {
             alert('✅ 链接已复制！\n快去分享给朋友吧~');
+            // 记录分享统计
+            if (typeof StatsController.recordShare === 'function') {
+                StatsController.recordShare('link');
+            }
         }).catch(() => {
             fallbackCopy(url);
         });
@@ -418,10 +422,15 @@ function fallbackCopy(text) {
 // 微信分享提示
 function shareToWechat() {
     const text = `我今天的情绪骰子结果是：「${currentResult.word}」\n${currentResult.desc}\n\n${window.location.href}`;
-    
+
     // 复制链接
     copyShareLink();
-    
+
+    // 记录分享统计
+    if (typeof StatsController.recordShare === 'function') {
+        StatsController.recordShare('wechat');
+    }
+
     alert('💡 分享步骤：\n1. 链接已复制\n2. 打开微信\n3. 选择聊天\n4. 粘贴发送\n\n快去分享吧！');
 }
 
@@ -430,18 +439,28 @@ function shareToQQ() {
     const url = window.location.href;
     const title = `情绪骰子 - ${currentResult.word}`;
     const desc = currentResult.desc;
-    
+
     const qqShareUrl = `https://connect.qq.com/share?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&desc=${encodeURIComponent(desc)}`;
     window.open(qqShareUrl, '_blank');
+
+    // 记录分享统计
+    if (typeof StatsController.recordShare === 'function') {
+        StatsController.recordShare('qq');
+    }
 }
 
 // 微博分享
 function shareToWeibo() {
     const url = window.location.href;
     const text = `我今天的情绪骰子结果是：「${currentResult.word}」 - ${currentResult.desc}`;
-    
+
     const weiboShareUrl = `https://service.weibo.com/share/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(text)}`;
     window.open(weiboShareUrl, '_blank');
+
+    // 记录分享统计
+    if (typeof StatsController.recordShare === 'function') {
+        StatsController.recordShare('weibo');
+    }
 }
 
 // ========== 历史记录 ==========
@@ -494,21 +513,23 @@ function loadHistory() {
 // ========== 分享图生成 ==========
 function generateShare() {
     if (!currentResult) return;
-    
+
     // 记录分享统计
-    StatsController.recordShare();
-    
+    if (typeof StatsController.recordShare === 'function') {
+        StatsController.recordShare('image');
+    }
+
     // 填充分享图内容
     document.getElementById('shareEmoji').textContent = currentResult.emoji;
     document.getElementById('shareWord').textContent = currentResult.word;
     document.getElementById('shareDesc').textContent = currentResult.desc;
     document.getElementById('shareDiceName').textContent = DICE_CONFIG[currentDiceIndex].name;
     document.getElementById('shareDate').textContent = new Date().toLocaleDateString('zh-CN');
-    
+
     // 设置背景色
     const shareCard = document.getElementById('shareCard');
     shareCard.style.background = `linear-gradient(135deg, ${DICE_CONFIG[currentDiceIndex].color} 0%, ${adjustColor(DICE_CONFIG[currentDiceIndex].color, -30)} 100%)`;
-    
+
     // 使用html2canvas生成图片
     html2canvas(document.getElementById('shareCanvas'), {
         width: 375,
