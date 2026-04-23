@@ -1121,9 +1121,16 @@ body::after {
 
 .share-desc {
     font-size: 18px;
-    line-height: 1.6;
+    line-height: 1.5;
     opacity: 0.9;
     margin-bottom: 20px;
+    min-height: 54px; /* 固定最小高度：1.5行高 × 18px × 2行 = 54px */
+    max-height: 54px; /* 固定最大高度，确保只显示2行 */
+    overflow: hidden;
+    display: -webkit-box;
+    -webkit-line-clamp: 2; /* 限制最多显示2行 */
+    -webkit-box-orient: vertical;
+    text-overflow: ellipsis;
 }
 
 .share-dice-name {
