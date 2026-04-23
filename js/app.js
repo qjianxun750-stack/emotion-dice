@@ -2,7 +2,7 @@
 const DICE_CONFIG = [
     {
         id: 'status',
-        name: '今日状态骰',
+        name: '今日状态',
         color: '#FF6B6B',
         faces: [
             { word: '小爷来了', emoji: '😎', desc: '今天有气势，冲！适合主动出击、表达自我' },
@@ -15,7 +15,7 @@ const DICE_CONFIG = [
     },
     {
         id: 'crazy',
-        name: '今日发疯骰',
+        name: '今日发疯',
         color: '#FF006E',
         faces: [
             { word: '想消失一下', emoji: '👻', desc: '不是真的消失，就是想从所有人的视线里消失三天' },
@@ -28,7 +28,7 @@ const DICE_CONFIG = [
     },
     {
         id: 'wish',
-        name: '今日祈愿骰',
+        name: '今日祈愿',
         color: '#8338EC',
         faces: [
             { word: '万一呢', emoji: '🍀', desc: '今天求个好运，信一半。留条退路，也留点期待' },
@@ -41,7 +41,7 @@ const DICE_CONFIG = [
     },
     {
         id: 'metaphysics',
-        name: '今日玄学骰',
+        name: '今日玄学',
         color: '#FFB703',
         faces: [
             { word: '万一呢', emoji: '🎲', desc: '今天信一半，留条退路。玄学也要理性' },
@@ -54,7 +54,7 @@ const DICE_CONFIG = [
     },
     {
         id: 'relationship',
-        name: '今日关系骰',
+        name: '今日关系',
         color: '#FB5607',
         faces: [
             { word: '自觉的背景板', emoji: '🎭', desc: '今天我在场，但不是主角。当个安静的观众' },
@@ -67,7 +67,7 @@ const DICE_CONFIG = [
     },
     {
         id: 'life',
-        name: '今日人生骰',
+        name: '今日人生',
         color: '#3A86FF',
         faces: [
             { word: '我在哪', emoji: '🌫️', desc: '今天迷失了，不知道自己在哪里。允许迷路' },
@@ -80,7 +80,7 @@ const DICE_CONFIG = [
     },
     {
         id: 'mom',
-        name: '今日妈妈骰',
+        name: '今日妈妈',
         color: '#06FFB4',
         faces: [
             { word: '沉默式应答', emoji: '😑', desc: '今天听见了，但没收到。左耳进右耳出' },
@@ -93,7 +93,7 @@ const DICE_CONFIG = [
     },
     {
         id: 'partner',
-        name: '今日搭子骰',
+        name: '今日搭子',
         color: '#FF69B4',
         faces: [
             { word: '今天不想说话', emoji: '🤐', desc: '今天需要搭子，但不需要交流，就是陪着' },
@@ -167,7 +167,6 @@ function initDiceTabs() {
             <span class="dice-card-icon">${dice.faces[0].emoji}</span>
             <span class="dice-card-name">${dice.name}</span>
             <span class="dice-card-desc">${descriptions[dice.id] || dice.name}</span>
-            <span class="dice-card-badge">点击选择</span>
         `;
 
         card.onclick = () => selectDice(index);
@@ -175,7 +174,6 @@ function initDiceTabs() {
     });
 
     updateDiceCards();
-    updatePageIndicator();
 }
 
 function updateDiceCards() {
