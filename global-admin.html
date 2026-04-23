@@ -356,11 +356,57 @@
         // 显示统计数据
         async function displayStats() {
             try {
+                console.log('开始加载全局统计数据...');
+
                 const overview = await GlobalStatsController.getOverview();
+                console.log('概览数据:', overview);
+
                 const shareStats = await GlobalStatsController.getShareStats();
+                console.log('分享数据:', shareStats);
+
                 const topDice = await GlobalStatsController.getTopDice(8);
+                console.log('热门骰子:', topDice);
+
                 const topResults = await GlobalStatsController.getTopResults(10);
+                console.log('热门结果:', topResults);
+
                 const trends = await GlobalStatsController.getTrends();
+                console.log('趋势数据:', trends);
+
+                // 检查是否有数据
+                const hasData = overview.totalRolls > 0 || overview.uniqueVisitors > 0;
+
+                if (!hasData) {
+                    // 显示无数据提示
+                    document.getElementById('loadingIndicator').innerHTML = `
+                        <div class="empty-state" style="padding: 60px 20px;">
+                            <div class="empty-state-icon" style="font-size: 64px;">📊</div>
+                            <h3 style="margin: 20px 0 10px;">暂无数据</h3>
+                            <p style="color: #666; margin-bottom: 20px;">还没有用户使用情绪骰子</p>
+                            <div class="info-box">
+                                <strong>💡 如何开始收集数据？</strong>
+                                <p style="margin-top: 10px; line-height: 1.6;">
+                                    1. 访问<a href="index.html" target="_blank" style="color: #667eea;">情绪骰子主页</a>并摇几次骰子<br>
+                                    2. 分享给朋友使用<br>
+                                    3. 再回到这个统计页面查看数据
+                                </p>
+                            </div>
+                            <div class="info-box" style="margin-top: 20px;">
+                                <strong>🔧 检查Supabase配置</strong>
+                                <p style="margin-top: 10px; font-size: 12px;">
+                                    确保已在Supabase中创建数据表：visitors、dice_rolls、shares<br>
+                                    查看浏览器控制台（F12）获取详细错误信息
+                                </p>
+                            </div>
+                        </div>
+                    `;
+                    document.getElementById('statsGrid').style.display = 'none';
+                    document.getElementById('shareSection').style.display = 'none';
+                    document.getElementById('chartSection').style.display = 'none';
+                    document.getElementById('trendSection').style.display = 'none';
+                    document.getElementById('actionSection').style.display = 'none';
+                    return;
+                }
 
                 // 更新总览
                 document.getElementById('uniqueVisitors').textContent = overview.uniqueVisitors;
@@ -395,8 +441,21 @@
             } catch (error) {
                 console.error('加载统计失败:', error);
                 document.getElementById('loadingIndicator').innerHTML = `
-                    <p style="color: #e74c3c;">⚠️ 数据加载失败，请稍后刷新重试</p>
-                    <p style="font-size: 12px; margin-top: 10px;">${error.message}</p>
+                    <div style="padding: 40px 20px; text-align: center;">
+                        <p style="color: #e74c3c; font-size: 18px; margin-bottom: 10px;">⚠️ 数据加载失败</p>
+                        <p style="color: #666; margin-bottom: 20px;">${error.message}</p>
+                        <div class="info-box">
+                            <strong>🔍 可能的原因：</strong>
+                            <ul style="text-align: left; margin-top: 10px; line-height: 1.8;">
+                                <li>Supabase数据表未创建或配置错误</li>
+                                <li>网络连接问题</li>
+                                <li>浏览器控制台有详细错误信息（按F12查看）</li>
+                            </ul>
+                        </div>
+                        <button onclick="location.reload()" style="margin-top: 20px; padding: 12px 30px; background: #667eea; color: white; border: none; border-radius: 25px; cursor: pointer; font-size: 16px;">
+                            🔄 重新加载
+                        </button>
+                    </div>
                 `;
             }
         }
