@@ -107,23 +107,12 @@
 
         <!-- 结果展示区 -->
         <div class="result-area" id="resultArea" style="display: none;">
-            <div class="result-card">
-                <div class="result-emoji" id="resultEmoji">😎</div>
-                <h2 class="result-word" id="resultWord">小爷来了</h2>
-                <p class="result-desc" id="resultDesc">今天有气势，冲！</p>
+            <p class="share-preview-title">📸 长按图片保存到相册</p>
+            <img id="shareImageResult" class="share-image-result" />
 
-                <!-- 分享图片预览 -->
-                <div class="share-preview-area" id="sharePreviewArea" style="display: none;">
-                    <p class="share-preview-title">📸 长按图片保存到相册</p>
-                    <img id="shareImageResult" class="share-image-result" />
-                </div>
-
-                <div class="result-actions">
-                    <button class="btn btn-primary" onclick="copyImage()">📋 复制图片</button>
-                    <button class="btn btn-secondary" onclick="downloadQRCode()">📥 下载二维码</button>
-                    <button class="btn btn-secondary" onclick="showShareOptions()">📤 直接分享</button>
-                    <button class="btn btn-secondary" onclick="rollAgain()">🎲 再摇一次</button>
-                </div>
+            <div class="result-actions">
+                <button class="btn btn-primary" onclick="copyImage()">📋 复制图片</button>
+                <button class="btn btn-secondary" onclick="rollAgain()">🎲 再摇一次</button>
             </div>
         </div>
 

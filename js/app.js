@@ -341,14 +341,10 @@ function calculateFinalRotation(faceIndex) {
 function showResult(result) {
     currentResult = result;
 
-    document.getElementById('resultEmoji').textContent = result.emoji;
-    document.getElementById('resultWord').textContent = result.word;
-    document.getElementById('resultDesc').textContent = result.desc;
-
     const resultArea = document.getElementById('resultArea');
     resultArea.style.display = 'block';
 
-    // 自动生成分享图
+    // 自动生成分享图（会在resultArea中显示）
     generateShareImage();
 
     // 滚动到结果区
@@ -656,12 +652,6 @@ function generateShareImage() {
 
     // 等待一小段时间确保二维码生成完成，然后生成分享图
     setTimeout(() => {
-        // 保存二维码canvas供单独下载使用
-        const qrCanvas = qrCodeContainer.querySelector('canvas');
-        if (qrCanvas) {
-            window.qrCodeData = qrCanvas.toDataURL('image/png');
-        }
-
         html2canvas(document.getElementById('shareCanvas'), {
             width: 375,
             height: 600,
@@ -670,16 +660,13 @@ function generateShareImage() {
             logging: false,
             useCORS: true
         }).then(canvas => {
-            // 在结果区显示分享图
-            const previewArea = document.getElementById('sharePreviewArea');
+            // 在结果区直接显示分享图
             const resultImage = document.getElementById('shareImageResult');
-
             resultImage.src = canvas.toDataURL('image/png');
-            previewArea.style.display = 'block';
 
             // 存储canvas数据供复制使用
             window.shareCanvasData = canvas.toDataURL('image/png');
-            window.shareCanvasBlob = canvas.toBlob((blob) => {
+            canvas.toBlob((blob) => {
                 window.shareCanvasBlobData = blob;
             }, 'image/png');
         }).catch(error => {
@@ -693,15 +680,14 @@ async function copyImage() {
     try {
         // 创建剪贴板项
         const clipboardItem = new ClipboardItem({
-            type: 'image/png',
-            blob: window.shareCanvasBlobData
+            'image/png': window.shareCanvasBlobData
         });
 
         // 写入剪贴板
         await navigator.clipboard.write([clipboardItem]);
 
         // 显示提示
-        alert('✅ 图片已复制到剪贴板！\n\n在微信中粘贴即可发送！\n\n提示：也可以长按上面的大图片保存');
+        alert('✅ 图片已复制！\n\n现在可以到微信/QQ等应用中粘贴发送了\n\n💡 提示：也可以长按图片保存到相册');
 
     } catch (error) {
         console.error('复制图片失败:', error);
@@ -716,48 +702,6 @@ function downloadShare() {
     link.download = `情绪骰子-${currentResult.word}-${new Date().getTime()}.png`;
     link.href = window.shareCanvasData;
     link.click();
-}
-
-// 下载二维码
-function downloadQRCode() {
-    if (!window.qrCodeData) {
-        alert('请先摇骰子生成二维码！');
-        return;
-    }
-
-    // 创建一个带白色背景的canvas
-    const img = new Image();
-    img.onload = function() {
-        const canvas = document.createElement('canvas');
-        const size = 300; // 二维码图片尺寸
-        canvas.width = size;
-        canvas.height = size + 40; // 额外空间给文字
-
-        const ctx = canvas.getContext('2d');
-
-        // 填充白色背景
-        ctx.fillStyle = '#ffffff';
-        ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-        // 绘制二维码
-        ctx.drawImage(img, (size - 200) / 2, 20, 200, 200);
-
-        // 绘制文字
-        ctx.fillStyle = '#333333';
-        ctx.font = 'bold 16px Arial, sans-serif';
-        ctx.textAlign = 'center';
-        ctx.fillText('扫码摇骰子', size / 2, size + 20);
-
-        // 下载图片
-        const link = document.createElement('a');
-        link.download = `情绪骰子二维码.png`;
-        link.href = canvas.toDataURL('image/png');
-        link.click();
-
-        alert('✅ 二维码已下载！\n\n可以发送给朋友或分享到社交媒体！');
-    };
-
-    img.src = window.qrCodeData;
 }
 
 function closeModal() {
