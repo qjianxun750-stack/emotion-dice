@@ -114,32 +114,60 @@ let history = [];
 
 // ========== 初始化 ==========
 window.onload = function() {
-    initDiceTabs();
-    loadDiceFaces();
-    loadHistory();
-
-    // 初始化音效
-    AudioController.init();
-
-    // 初始化统计
-    StatsController.init();
-
-    // 绑定骰子点击事件
-    document.getElementById('diceContainer').addEventListener('click', rollDice);
-
-    // 从 localStorage 读取上次使用的骰子
-    const savedDiceIndex = localStorage.getItem('lastDiceIndex');
-    if (savedDiceIndex !== null) {
-        currentDiceIndex = parseInt(savedDiceIndex);
-        updateDiceTabs();
+    try {
+        initDiceTabs();
         loadDiceFaces();
-        // 设置主题背景
-        document.body.classList.add(`theme-${DICE_CONFIG[currentDiceIndex].id}`);
-    } else {
-        // 默认设置第一个主题背景
-        document.body.classList.add(`theme-${DICE_CONFIG[0].id}`);
+        loadHistory();
+
+        // 初始化音效（安全模式）
+        try {
+            AudioController.init();
+        } catch (e) {
+            console.warn('音效初始化失败:', e);
+        }
+
+        // 初始化本地统计
+        try {
+            StatsController.init();
+        } catch (e) {
+            console.warn('本地统计初始化失败:', e);
+        }
+
+        // 初始化全局统计（异步，不阻塞页面）
+        try {
+            if (typeof GlobalStatsController !== 'undefined') {
+                GlobalStatsController.init();
+            }
+        } catch (e) {
+            console.warn('全局统计初始化失败:', e);
+        }
+
+        // 绑定骰子点击事件
+        document.getElementById('diceContainer').addEventListener('click', rollDice);
+
+        // 从 localStorage 读取上次使用的骰子
+        const savedDiceIndex = localStorage.getItem('lastDiceIndex');
+        if (savedDiceIndex !== null) {
+            currentDiceIndex = parseInt(savedDiceIndex);
+            updateDiceTabs();
+            loadDiceFaces();
+            // 设置主题背景
+            document.body.classList.add(`theme-${DICE_CONFIG[currentDiceIndex].id}`);
+        } else {
+            // 默认设置第一个主题背景
+            document.body.classList.add(`theme-${DICE_CONFIG[0].id}`);
+        }
+    } catch (error) {
+        console.error('初始化错误:', error);
+        // 确保页面至少能显示基本内容
     }
 };
+
+// 添加全局错误处理，防止单个错误导致页面崩溃
+window.addEventListener('error', function(e) {
+    console.error('页面错误:', e.message, e.filename, e.lineno);
+    // 不阻止默认行为，让页面继续运行
+});
 
 // ========== 骰子主题切换 ==========
 function initDiceTabs() {

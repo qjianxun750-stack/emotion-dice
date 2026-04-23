@@ -31,79 +31,91 @@ const GlobalStatsController = {
 
     // 记录访问
     async recordVisit() {
-        const visitorId = this.getOrCreateVisitorId();
-
         try {
-            // 记录到Supabase
-            await SupabaseClient.insert('visitors', {
-                visitor_id: visitorId,
-                device_type: this.detectDevice()
-            });
+            const visitorId = this.getOrCreateVisitorId();
+
+            // 记录到Supabase（异步，不阻塞）
+            if (typeof SupabaseClient !== 'undefined' && SupabaseClient.insert) {
+                SupabaseClient.insert('visitors', {
+                    visitor_id: visitorId,
+                    device_type: this.detectDevice()
+                }).catch(err => {
+                    console.warn('Supabase记录访问失败:', err);
+                });
+            }
 
             // 同时记录到本地统计（保持兼容）
             if (typeof StatsController === 'object' && StatsController.recordVisit) {
-                StatsController.recordVisit();
+                try {
+                    StatsController.recordVisit();
+                } catch (e) {
+                    console.warn('本地统计记录失败:', e);
+                }
             }
         } catch (error) {
             console.error('记录访问失败:', error);
-            // 降级到本地统计
-            if (typeof StatsController === 'object' && StatsController.recordVisit) {
-                StatsController.recordVisit();
-            }
         }
     },
 
     // 记录摇骰子
     async recordRoll(diceName, diceId, result) {
-        const visitorId = this.getOrCreateVisitorId();
-
         try {
-            // 记录到Supabase
-            await SupabaseClient.insert('dice_rolls', {
-                visitor_id: visitorId,
-                dice_name: diceName,
-                dice_id: diceId,
-                result_word: result.word,
-                result_emoji: result.emoji,
-                result_desc: result.desc
-            });
+            const visitorId = this.getOrCreateVisitorId();
+
+            // 记录到Supabase（异步，不阻塞）
+            if (typeof SupabaseClient !== 'undefined' && SupabaseClient.insert) {
+                SupabaseClient.insert('dice_rolls', {
+                    visitor_id: visitorId,
+                    dice_name: diceName,
+                    dice_id: diceId,
+                    result_word: result.word,
+                    result_emoji: result.emoji,
+                    result_desc: result.desc
+                }).catch(err => {
+                    console.warn('Supabase记录摇骰子失败:', err);
+                });
+            }
 
             // 同时记录到本地统计
             if (typeof StatsController === 'object' && StatsController.recordRoll) {
-                StatsController.recordRoll(diceName, result.word);
+                try {
+                    StatsController.recordRoll(diceName, result.word);
+                } catch (e) {
+                    console.warn('本地统计记录失败:', e);
+                }
             }
         } catch (error) {
             console.error('记录摇骰子失败:', error);
-            // 降级到本地统计
-            if (typeof StatsController === 'object' && StatsController.recordRoll) {
-                StatsController.recordRoll(diceName, result.word);
-            }
         }
     },
 
     // 记录分享
     async recordShare(shareType = 'link', diceName = null, resultWord = null) {
-        const visitorId = this.getOrCreateVisitorId();
-
         try {
-            // 记录到Supabase
-            await SupabaseClient.insert('shares', {
-                visitor_id: visitorId,
-                share_type: shareType,
-                dice_name: diceName,
-                result_word: resultWord
-            });
+            const visitorId = this.getOrCreateVisitorId();
+
+            // 记录到Supabase（异步，不阻塞）
+            if (typeof SupabaseClient !== 'undefined' && SupabaseClient.insert) {
+                SupabaseClient.insert('shares', {
+                    visitor_id: visitorId,
+                    share_type: shareType,
+                    dice_name: diceName,
+                    result_word: resultWord
+                }).catch(err => {
+                    console.warn('Supabase记录分享失败:', err);
+                });
+            }
 
             // 同时记录到本地统计
             if (typeof StatsController === 'object' && StatsController.recordShare) {
-                StatsController.recordShare();
+                try {
+                    StatsController.recordShare();
+                } catch (e) {
+                    console.warn('本地统计记录失败:', e);
+                }
             }
         } catch (error) {
             console.error('记录分享失败:', error);
-            // 降级到本地统计
-            if (typeof StatsController === 'object' && StatsController.recordShare) {
-                StatsController.recordShare();
-            }
         }
     },
 
