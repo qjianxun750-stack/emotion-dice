@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>自动添加测试数据</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .container {
+            background: white;
+            border-radius: 20px;
+            padding: 40px;
+            max-width: 700px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 20px;
+            color: #333;
+        }
+
+        .progress {
+            background: #f0f0f0;
+            border-radius: 10px;
+            padding: 15px;
+            margin-bottom: 20px;
+            font-size: 14px;
+            font-family: monospace;
+            min-height: 60px;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-bottom: 15px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+        }
+
+        .status {
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            display: none;
+        }
+
+        .status.success {
+            background: #d4edda;
+            color: #155724;
+            display: block;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+            display: block;
+        }
+
+        .info {
+            background: #e7f3ff;
+            padding: 15px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            font-size: 13px;
+        }
+
+        .success-actions {
+            display: none;
+            margin-top: 20px;
+        }
+
+        .success-actions button {
+            background: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>🎲 自动添加测试数据</h1>
+
+        <div class="info">
+            <strong>📋 将自动添加：</strong>
+            <ul style="margin-left: 20px; margin-top: 10px;">
+                <li>✅ 10个独立访客</li>
+                <li>✅ 50次摇骰子记录</li>
+                <li>✅ 8次分享记录</li>
+            </ul>
+        </div>
+
+        <div id="progress" class="progress">等待开始...</div>
+
+        <button id="startBtn" class="btn" onclick="startAdding()">🚀 开始自动添加</button>
+        <button id="viewStatsBtn" class="btn" onclick="viewStats()" style="background: #17a2b8;">📊 查看全局统计</button>
+
+        <div id="status" class="status"></div>
+
+        <div id="successActions" class="success-actions">
+            <button class="btn" onclick="window.location.href='global-admin.html'">📊 查看全局统计</button>
+        </div>
+    </div>
+
+    <script src="js/supabase-client.js"></script>
+    <script>
+        const SUPABASE_CONFIG = {
+            url: 'https://xwbhgojqgyaopqlhuqqd.supabase.co',
+            key: 'sb_publishable_JcgkknAzBdcpXaMCmWSBsg_ZHM3WHuu'
+        };
+
+        const diceNames = ['今日状态', '今日发疯', '今日祈愿', '今日玄学', '今日关系', '今日人生', '今日妈妈', '今日搭子'];
+        const results = [
+            { word: '小爷来了', emoji: '😎', desc: '今天有气势，冲！' },
+            { word: '清醒的NPC', emoji: '🤖', desc: '今天配合，但心里明白' },
+            { word: '电量不足', emoji: '🪫', desc: '今天没能量' },
+            { word: '继续营业', emoji: '😐', desc: '今天正常运转' },
+            { word: '我爱工作', emoji: '😅', desc: '今天认命了' },
+            { word: '想消失一下', emoji: '👻', desc: '想从所有人视线里消失' },
+            { word: '想说不', emoji: '🙅', desc: '今天有一百个请求想拒绝' },
+            { word: '求个心安', emoji: '🙏', desc: '今天只求踏实' }
+        ];
+
+        async function startAdding() {
+            const btn = document.getElementById('startBtn');
+            const progress = document.getElementById('progress');
+            const status = document.getElementById('status');
+
+            btn.disabled = true;
+            btn.textContent = '⏳ 正在添加...';
+            status.className = 'status';
+            status.style.display = 'none';
+
+            try {
+                progress.textContent = '正在添加访客...';
+
+                // 1. 添加10个访客
+                const visitorIds = [];
+                for (let i = 0; i < 10; i++) {
+                    const visitorId = 'test_' + Date.now() + '_' + i;
+                    visitorIds.push(visitorId);
+
+                    await fetch(`${SUPABASE_CONFIG.url}/rest/v1/visitors`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_CONFIG.key,
+                            'Authorization': `Bearer ${SUPABASE_CONFIG.key}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=representation'
+                        },
+                        body: JSON.stringify({
+                            visitor_id: visitorId,
+                            device_type: Math.random() > 0.5 ? 'mobile' : 'desktop'
+                        })
+                    }).then(r => r.json());
+
+                    progress.textContent = `正在添加访客... ${i + 1}/10`;
+                }
+
+                progress.textContent = '✅ 访客添加完成！正在添加摇骰子记录...';
+
+                // 2. 添加50次摇骰子
+                for (let i = 0; i < 50; i++) {
+                    const diceName = diceNames[Math.floor(Math.random() * diceNames.length)];
+                    const result = results[Math.floor(Math.random() * results.length)];
+                    const visitorId = visitorIds[Math.floor(Math.random() * visitorIds.length)];
+
+                    await fetch(`${SUPABASE_CONFIG.url}/rest/v1/dice_rolls`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_CONFIG.key,
+                            'Authorization': `Bearer ${SUPABASE_CONFIG.key}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=representation'
+                        },
+                        body: JSON.stringify({
+                            visitor_id: visitorId,
+                            dice_name: diceName,
+                            dice_id: diceNames.indexOf(diceName).toString(),
+                            result_word: result.word,
+                            result_emoji: result.emoji,
+                            result_desc: result.desc
+                        })
+                    });
+
+                    if ((i + 1) % 10 === 0) {
+                        progress.textContent = `正在添加摇骰子记录... ${i + 1}/50`;
+                    }
+                }
+
+                progress.textContent = '✅ 摇骰子记录添加完成！正在添加分享记录...';
+
+                // 3. 添加8次分享
+                const shareTypes = ['wechat', 'qq', 'weibo', 'link', 'image'];
+                for (let i = 0; i < 8; i++) {
+                    const shareType = shareTypes[i % shareTypes.length];
+                    const visitorId = visitorIds[Math.floor(Math.random() * visitorIds.length)];
+                    const diceName = diceNames[Math.floor(Math.random() * diceNames.length)];
+                    const resultWord = results[Math.floor(Math.random() * results.length)].word;
+
+                    await fetch(`${SUPABASE_CONFIG.url}/rest/v1/shares`, {
+                        method: 'POST',
+                        headers: {
+                            'apikey': SUPABASE_CONFIG.key,
+                            'Authorization': `Bearer ${SUPABASE_CONFIG.key}`,
+                            'Content-Type': 'application/json',
+                            'Prefer': 'return=representation'
+                        },
+                        body: JSON.stringify({
+                            visitor_id: visitorId,
+                            share_type: shareType,
+                            dice_name: diceName,
+                            result_word: resultWord
+                        })
+                    });
+                }
+
+                progress.textContent = '✅✅✅ 所有数据添加完成！';
+
+                status.className = 'status success';
+                status.innerHTML = `
+                    <h3>🎉 测试数据添加成功！</h3>
+                    <p><strong>已添加：</strong></p>
+                    <ul style="text-align: left; margin: 20px;">
+                        <li>✅ 独立访客数：<strong>10</strong></li>
+                        <li>✅ 摇骰子次数：<strong>50</strong></li>
+                        <li>✅ 分享次数：<strong>8</strong></li>
+                        <li>✅ 分享转化率：<strong>16%</strong></li>
+                    </ul>
+                    <p style="margin-top: 20px;">现在可以查看全局统计了！</p>
+                `;
+
+                btn.textContent = '✅ 添加完成';
+                document.getElementById('successActions').style.display = 'block';
+
+            } catch (error) {
+                console.error('错误:', error);
+
+                progress.textContent = '❌ 添加失败';
+
+                status.className = 'status error';
+                status.innerHTML = `
+                    <h3>❌ 添加失败</h3>
+                    <p style="margin-bottom: 15px;">${error.message}</p>
+                    <div style="background: #fff3cd; padding: 15px; border-radius: 8px;">
+                        <strong>🔧 可能的原因：</strong>
+                        <ul style="text-align: left; margin-top: 10px;">
+                            <li>Supabase表的RLS策略阻止了插入</li>
+                            <li>需要在Supabase中修改RLS策略</li>
+                        </ul>
+                        <p style="margin-top: 10px;"><strong>解决方法：</strong></p>
+                        <ol style="text-align: left; margin-top: 5px;">
+                            <li>访问 <a href="https://supabase.com/dashboard" target="_blank">Supabase控制台</a></li>
+                            <li>进入项目 → Authentication → Policies</li>
+                            <li>为每个表（visitors、dice_rolls、shares）添加策略：</li>
+                            <li style="margin-left: 20px;">CREATE POLICY "Enable insert" ON table_name FOR INSERT WITH CHECK (true);</li>
+                        </ol>
+                    </div>
+                    <button onclick="location.reload()" style="margin-top: 15px; padding: 10px 20px; background: #667eea; color: white; border: none; border-radius: 8px; cursor: pointer;">🔄 重新加载</button>
+                `;
+                btn.disabled = false;
+            }
+        }
+
+        function viewStats() {
+            window.location.href = 'global-admin.html';
+        }
+
+        // 页面加载后自动开始
+        window.onload = function() {
+            setTimeout(() => {
+                console.log('自动开始添加数据...');
+                startAdding();
+            }, 2000);
+        };
+    </script>
+</body>
+</html>
