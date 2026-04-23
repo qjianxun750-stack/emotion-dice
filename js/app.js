@@ -143,30 +143,61 @@ window.onload = function() {
 
 // ========== 骰子主题切换 ==========
 function initDiceTabs() {
-    const tabsContainer = document.getElementById('diceTabs');
-    tabsContainer.innerHTML = '';
-    
+    const cardsContainer = document.getElementById('diceCards');
+    cardsContainer.innerHTML = '';
+
     DICE_CONFIG.forEach((dice, index) => {
-        const tab = document.createElement('div');
-        tab.className = 'dice-tab';
-        tab.textContent = dice.name;
-        tab.onclick = () => selectDice(index);
-        tabsContainer.appendChild(tab);
+        const card = document.createElement('div');
+        card.className = 'dice-card';
+        card.dataset.dice = dice.id;
+
+        // 为每个骰子添加描述
+        const descriptions = {
+            'status': '今天什么状态？',
+            'crazy': '想发疯吗？',
+            'wish': '求个好运',
+            'metaphysics': '信个玄学',
+            'relationship': '关系怎么样？',
+            'life': '人生感悟',
+            'mom': '妈妈的唠叨',
+            'partner': '搭子社交'
+        };
+
+        card.innerHTML = `
+            <span class="dice-card-icon">${dice.faces[0].emoji}</span>
+            <span class="dice-card-name">${dice.name}</span>
+            <span class="dice-card-desc">${descriptions[dice.id] || dice.name}</span>
+            <span class="dice-card-badge">点击选择</span>
+        `;
+
+        card.onclick = () => selectDice(index);
+        cardsContainer.appendChild(card);
     });
-    
-    updateDiceTabs();
+
+    updateDiceCards();
+    updatePageIndicator();
 }
 
-function updateDiceTabs() {
-    const tabs = document.querySelectorAll('.dice-tab');
-    tabs.forEach((tab, index) => {
-        tab.classList.toggle('active', index === currentDiceIndex);
+function updateDiceCards() {
+    const cards = document.querySelectorAll('.dice-card');
+    cards.forEach((card, index) => {
+        card.classList.toggle('active', index === currentDiceIndex);
     });
+}
+
+function updatePageIndicator() {
+    const totalPages = Math.ceil(DICE_CONFIG.length / 8);
+    const currentPage = Math.floor(currentDiceIndex / 8) + 1;
+    const indicator = document.getElementById('pageIndicator');
+    if (indicator) {
+        indicator.textContent = `${currentPage} / ${totalPages}`;
+    }
 }
 
 function selectDice(index) {
     currentDiceIndex = index;
-    updateDiceTabs();
+    updateDiceCards();
+    updatePageIndicator();
     loadDiceFaces();
     localStorage.setItem('lastDiceIndex', index);
 
