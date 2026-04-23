@@ -656,10 +656,16 @@ function generateShareImage() {
 
     // 等待一小段时间确保二维码生成完成，然后生成分享图
     setTimeout(() => {
+        // 保存二维码canvas供单独下载使用
+        const qrCanvas = qrCodeContainer.querySelector('canvas');
+        if (qrCanvas) {
+            window.qrCodeData = qrCanvas.toDataURL('image/png');
+        }
+
         html2canvas(document.getElementById('shareCanvas'), {
             width: 375,
             height: 600,
-            scale: 2,
+            scale: 3, // 提高scale使二维码更清晰
             backgroundColor: null,
             logging: false,
             useCORS: true
@@ -705,11 +711,53 @@ async function copyImage() {
 
 function downloadShare() {
     if (!window.shareCanvasData) return;
-    
+
     const link = document.createElement('a');
     link.download = `情绪骰子-${currentResult.word}-${new Date().getTime()}.png`;
     link.href = window.shareCanvasData;
     link.click();
+}
+
+// 下载二维码
+function downloadQRCode() {
+    if (!window.qrCodeData) {
+        alert('请先摇骰子生成二维码！');
+        return;
+    }
+
+    // 创建一个带白色背景的canvas
+    const img = new Image();
+    img.onload = function() {
+        const canvas = document.createElement('canvas');
+        const size = 300; // 二维码图片尺寸
+        canvas.width = size;
+        canvas.height = size + 40; // 额外空间给文字
+
+        const ctx = canvas.getContext('2d');
+
+        // 填充白色背景
+        ctx.fillStyle = '#ffffff';
+        ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+        // 绘制二维码
+        ctx.drawImage(img, (size - 200) / 2, 20, 200, 200);
+
+        // 绘制文字
+        ctx.fillStyle = '#333333';
+        ctx.font = 'bold 16px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('扫码摇骰子', size / 2, size + 20);
+
+        // 下载图片
+        const link = document.createElement('a');
+        link.download = `情绪骰子二维码.png`;
+        link.href = canvas.toDataURL('image/png');
+        link.click();
+
+        alert('✅ 二维码已下载！\n\n可以发送给朋友或分享到社交媒体！');
+    };
+
+    img.src = window.qrCodeData;
 }
 
 function closeModal() {

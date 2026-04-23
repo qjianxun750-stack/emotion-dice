@@ -120,6 +120,7 @@
 
                 <div class="result-actions">
                     <button class="btn btn-primary" onclick="copyImage()">📋 复制图片</button>
+                    <button class="btn btn-secondary" onclick="downloadQRCode()">📥 下载二维码</button>
                     <button class="btn btn-secondary" onclick="showShareOptions()">📤 直接分享</button>
                     <button class="btn btn-secondary" onclick="rollAgain()">🎲 再摇一次</button>
                 </div>
@@ -174,7 +175,10 @@
             </div>
             <div class="share-footer">
                 <div class="share-date" id="shareDate">2026-04-23</div>
-                <div class="share-qrcode" id="shareQRCode"></div>
+                <div class="share-qrcode-wrapper">
+                    <div class="share-qrcode" id="shareQRCode"></div>
+                    <div class="share-qrcode-hint">扫码摇骰子</div>
+                </div>
                 <div class="share-link">emotion-dice.vercel.app</div>
             </div>
         </div>
