@@ -634,33 +634,64 @@ function generateShareImage() {
     document.getElementById('shareDiceName').textContent = DICE_CONFIG[currentDiceIndex].name;
     document.getElementById('shareDate').textContent = new Date().toLocaleDateString('zh-CN');
 
+    // 生成二维码（使用GitHub链接，兼容性更好）
+    const shareUrl = 'https://qjianxun750-stack.github.io/emotion-dice/';
+    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(shareUrl)}&bgcolor=ffffff`;
+    document.getElementById('shareQRCode').src = qrCodeUrl;
+
     // 设置背景色
     const shareCard = document.getElementById('shareCard');
     shareCard.style.background = `linear-gradient(135deg, ${DICE_CONFIG[currentDiceIndex].color} 0%, ${adjustColor(DICE_CONFIG[currentDiceIndex].color, -30)} 100%)`;
 
-    // 使用html2canvas生成图片
-    html2canvas(document.getElementById('shareCanvas'), {
-        width: 375,
-        height: 600,
-        scale: 2,
-        backgroundColor: null,
-        logging: false
-    }).then(canvas => {
-        // 在结果区显示分享图
-        const previewArea = document.getElementById('sharePreviewArea');
-        const resultImage = document.getElementById('shareImageResult');
+    // 等待二维码加载完成后生成图片
+    const qrImage = document.getElementById('shareQRCode');
+    qrImage.onload = function() {
+        // 使用html2canvas生成图片
+        html2canvas(document.getElementById('shareCanvas'), {
+            width: 375,
+            height: 600,
+            scale: 2,
+            backgroundColor: null,
+            logging: false,
+            useCORS: true, // 允许跨域图片
+            allowTaint: true
+        }).then(canvas => {
+            // 在结果区显示分享图
+            const previewArea = document.getElementById('sharePreviewArea');
+            const resultImage = document.getElementById('shareImageResult');
 
-        resultImage.src = canvas.toDataURL('image/png');
-        previewArea.style.display = 'block';
+            resultImage.src = canvas.toDataURL('image/png');
+            previewArea.style.display = 'block';
 
-        // 存储canvas数据供复制使用
-        window.shareCanvasData = canvas.toDataURL('image/png');
-        window.shareCanvasBlob = canvas.toBlob((blob) => {
-            window.shareCanvasBlobData = blob;
-        }, 'image/png');
-    }).catch(error => {
-        console.error('生成分享图失败:', error);
-    });
+            // 存储canvas数据供复制使用
+            window.shareCanvasData = canvas.toDataURL('image/png');
+            window.shareCanvasBlob = canvas.toBlob((blob) => {
+                window.shareCanvasBlobData = blob;
+            }, 'image/png');
+        }).catch(error => {
+            console.error('生成分享图失败:', error);
+        });
+    };
+
+    qrImage.onerror = function() {
+        console.warn('二维码加载失败，使用备用方案');
+        // 即使二维码加载失败，也生成分享图
+        html2canvas(document.getElementById('shareCanvas'), {
+            width: 375,
+            height: 600,
+            scale: 2,
+            backgroundColor: null,
+            logging: false
+        }).then(canvas => {
+            const previewArea = document.getElementById('sharePreviewArea');
+            const resultImage = document.getElementById('shareImageResult');
+            resultImage.src = canvas.toDataURL('image/png');
+            previewArea.style.display = 'block';
+            window.shareCanvasData = canvas.toDataURL('image/png');
+        }).catch(error => {
+            console.error('生成分享图失败:', error);
+        });
+    };
 }
 
 // 复制图片到剪贴板

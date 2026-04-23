@@ -1246,9 +1246,14 @@ body::after {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #667eea;
-    font-size: 12px;
-    font-weight: bold;
+    padding: 5px;
+}
+
+.share-qrcode-img {
+    width: 100%;
+    height: 100%;
+    object-fit: contain;
+    display: block;
 }
 
 .share-link {
