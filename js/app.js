@@ -312,19 +312,22 @@ function calculateFinalRotation(faceIndex) {
 // ========== 显示结果 ==========
 function showResult(result) {
     currentResult = result;
-    
+
     document.getElementById('resultEmoji').textContent = result.emoji;
     document.getElementById('resultWord').textContent = result.word;
     document.getElementById('resultDesc').textContent = result.desc;
-    
+
     const resultArea = document.getElementById('resultArea');
     resultArea.style.display = 'block';
-    
+
+    // 自动生成分享图
+    generateShareImage();
+
     // 滚动到结果区
     setTimeout(() => {
-        resultArea.scrollIntoView({ 
-            behavior: 'smooth', 
-            block: 'center' 
+        resultArea.scrollIntoView({
+            behavior: 'smooth',
+            block: 'center'
         });
     }, 100);
 }
@@ -583,13 +586,74 @@ function generateShare() {
         img.style.width = '100%';
         img.style.borderRadius = '10px';
         preview.appendChild(img);
-        
+
         // 存储canvas数据供下载使用
         window.shareCanvasData = canvas.toDataURL('image/png');
-        
+
         // 显示模态框
         document.getElementById('shareModal').classList.add('show');
     });
+}
+
+// 自动生成分享图（不显示模态框）
+function generateShareImage() {
+    if (!currentResult) return;
+
+    // 填充分享图内容
+    document.getElementById('shareEmoji').textContent = currentResult.emoji;
+    document.getElementById('shareWord').textContent = currentResult.word;
+    document.getElementById('shareDesc').textContent = currentResult.desc;
+    document.getElementById('shareDiceName').textContent = DICE_CONFIG[currentDiceIndex].name;
+    document.getElementById('shareDate').textContent = new Date().toLocaleDateString('zh-CN');
+
+    // 设置背景色
+    const shareCard = document.getElementById('shareCard');
+    shareCard.style.background = `linear-gradient(135deg, ${DICE_CONFIG[currentDiceIndex].color} 0%, ${adjustColor(DICE_CONFIG[currentDiceIndex].color, -30)} 100%)`;
+
+    // 使用html2canvas生成图片
+    html2canvas(document.getElementById('shareCanvas'), {
+        width: 375,
+        height: 600,
+        scale: 2,
+        backgroundColor: null,
+        logging: false
+    }).then(canvas => {
+        // 在结果区显示分享图
+        const previewArea = document.getElementById('sharePreviewArea');
+        const resultImage = document.getElementById('shareImageResult');
+
+        resultImage.src = canvas.toDataURL('image/png');
+        previewArea.style.display = 'block';
+
+        // 存储canvas数据供复制使用
+        window.shareCanvasData = canvas.toDataURL('image/png');
+        window.shareCanvasBlob = canvas.toBlob((blob) => {
+            window.shareCanvasBlobData = blob;
+        }, 'image/png');
+    }).catch(error => {
+        console.error('生成分享图失败:', error);
+    });
+}
+
+// 复制图片到剪贴板
+async function copyImage() {
+    try {
+        // 创建剪贴板项
+        const clipboardItem = new ClipboardItem({
+            type: 'image/png',
+            blob: window.shareCanvasBlobData
+        });
+
+        // 写入剪贴板
+        await navigator.clipboard.write([clipboardItem]);
+
+        // 显示提示
+        alert('✅ 图片已复制到剪贴板！\n\n在微信中粘贴即可发送！\n\n提示：也可以长按上面的大图片保存');
+
+    } catch (error) {
+        console.error('复制图片失败:', error);
+        alert('❌ 复制失败，请尝试长按图片保存');
+    }
 }
 
 function downloadShare() {

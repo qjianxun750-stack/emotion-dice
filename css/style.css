@@ -909,6 +909,35 @@ body::after {
     justify-content: center;
 }
 
+/* 分享图片预览区 */
+.share-preview-area {
+    margin: 20px 0;
+    text-align: center;
+}
+
+.share-preview-title {
+    font-size: 14px;
+    color: #667eea;
+    font-weight: bold;
+    margin-bottom: 15px;
+}
+
+.share-image-result {
+    max-width: 100%;
+    width: auto;
+    border-radius: 15px;
+    box-shadow: 0 8px 25px rgba(0,0,0,0.2);
+    cursor: pointer;
+    transition: transform 0.3s;
+    user-select: none;
+    -webkit-user-select: none;
+    -webkit-touch-callout: none;
+}
+
+.share-image-result:active {
+    transform: scale(0.98);
+}
+
 .btn {
     padding: 14px 28px;
     border: none;
