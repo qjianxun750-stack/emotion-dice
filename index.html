@@ -64,11 +64,31 @@
             <p class="subtitle">摇一摇，看今天是什么状态</p>
         </header>
 
+        <!-- 玩法模式切换 -->
+        <div class="mode-selector">
+            <div class="mode-tabs">
+                <button class="mode-tab active" data-mode="single" onclick="switchMode('single')">
+                    🎯 单骰子模式
+                </button>
+                <button class="mode-tab" data-mode="combo" onclick="switchMode('combo')">
+                    🎲 组合骰子模式
+                </button>
+            </div>
+        </div>
+
         <!-- 骰子主题切换 - 卡片式布局 -->
-        <div class="dice-selector">
+        <div class="dice-selector" id="diceSelector">
             <h2 class="selector-title">🎯 选择主题</h2>
             <div class="dice-cards" id="diceCards">
                 <!-- 动态生成骰子主题卡片 -->
+            </div>
+        </div>
+
+        <!-- 组合骰子选择器（初始隐藏） -->
+        <div class="combo-selector" id="comboSelector" style="display: none;">
+            <h2 class="selector-title">🎲 选择组合</h2>
+            <div class="combo-cards" id="comboCards">
+                <!-- 动态生成组合骰子卡片 -->
             </div>
         </div>
 
