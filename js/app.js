@@ -253,10 +253,14 @@ function rollDice() {
             
             // 保存到历史
             saveToHistory(result);
-            
-            // 记录统计
-            StatsController.recordRoll(DICE_CONFIG[currentDiceIndex].name, result.word);
-            
+
+            // 记录统计到全局数据库
+            GlobalStatsController.recordRoll(
+                DICE_CONFIG[currentDiceIndex].name,
+                DICE_CONFIG[currentDiceIndex].id,
+                result
+            );
+
             hint.textContent = '✨ 点击骰子再摇一次';
             isRolling = false;
         }, 2000);
@@ -388,10 +392,11 @@ function copyShareLink() {
     if (navigator.clipboard) {
         navigator.clipboard.writeText(url).then(() => {
             alert('✅ 链接已复制！\n快去分享给朋友吧~');
-            // 记录分享统计
-            if (typeof StatsController.recordShare === 'function') {
-                StatsController.recordShare('link');
-            }
+            // 记录分享统计到全局数据库
+            GlobalStatsController.recordShare('link',
+                currentResult ? DICE_CONFIG[currentDiceIndex].name : null,
+                currentResult ? currentResult.word : null
+            );
         }).catch(() => {
             fallbackCopy(url);
         });
@@ -426,10 +431,11 @@ function shareToWechat() {
     // 复制链接
     copyShareLink();
 
-    // 记录分享统计
-    if (typeof StatsController.recordShare === 'function') {
-        StatsController.recordShare('wechat');
-    }
+    // 记录分享统计到全局数据库
+    GlobalStatsController.recordShare('wechat',
+        currentResult ? DICE_CONFIG[currentDiceIndex].name : null,
+        currentResult ? currentResult.word : null
+    );
 
     alert('💡 分享步骤：\n1. 链接已复制\n2. 打开微信\n3. 选择聊天\n4. 粘贴发送\n\n快去分享吧！');
 }
@@ -443,10 +449,11 @@ function shareToQQ() {
     const qqShareUrl = `https://connect.qq.com/share?url=${encodeURIComponent(url)}&title=${encodeURIComponent(title)}&desc=${encodeURIComponent(desc)}`;
     window.open(qqShareUrl, '_blank');
 
-    // 记录分享统计
-    if (typeof StatsController.recordShare === 'function') {
-        StatsController.recordShare('qq');
-    }
+    // 记录分享统计到全局数据库
+    GlobalStatsController.recordShare('qq',
+        currentResult ? DICE_CONFIG[currentDiceIndex].name : null,
+        currentResult ? currentResult.word : null
+    );
 }
 
 // 微博分享
@@ -457,10 +464,11 @@ function shareToWeibo() {
     const weiboShareUrl = `https://service.weibo.com/share/share.php?url=${encodeURIComponent(url)}&title=${encodeURIComponent(text)}`;
     window.open(weiboShareUrl, '_blank');
 
-    // 记录分享统计
-    if (typeof StatsController.recordShare === 'function') {
-        StatsController.recordShare('weibo');
-    }
+    // 记录分享统计到全局数据库
+    GlobalStatsController.recordShare('weibo',
+        currentResult ? DICE_CONFIG[currentDiceIndex].name : null,
+        currentResult ? currentResult.word : null
+    );
 }
 
 // ========== 历史记录 ==========
@@ -514,10 +522,11 @@ function loadHistory() {
 function generateShare() {
     if (!currentResult) return;
 
-    // 记录分享统计
-    if (typeof StatsController.recordShare === 'function') {
-        StatsController.recordShare('image');
-    }
+    // 记录分享统计到全局数据库
+    GlobalStatsController.recordShare('image',
+        DICE_CONFIG[currentDiceIndex].name,
+        currentResult.word
+    );
 
     // 填充分享图内容
     document.getElementById('shareEmoji').textContent = currentResult.emoji;
