@@ -117,22 +117,27 @@ window.onload = function() {
     initDiceTabs();
     loadDiceFaces();
     loadHistory();
-    
+
     // 初始化音效
     AudioController.init();
-    
+
     // 初始化统计
     StatsController.init();
-    
+
     // 绑定骰子点击事件
     document.getElementById('diceContainer').addEventListener('click', rollDice);
-    
+
     // 从 localStorage 读取上次使用的骰子
     const savedDiceIndex = localStorage.getItem('lastDiceIndex');
     if (savedDiceIndex !== null) {
         currentDiceIndex = parseInt(savedDiceIndex);
         updateDiceTabs();
         loadDiceFaces();
+        // 设置主题背景
+        document.body.classList.add(`theme-${DICE_CONFIG[currentDiceIndex].id}`);
+    } else {
+        // 默认设置第一个主题背景
+        document.body.classList.add(`theme-${DICE_CONFIG[0].id}`);
     }
 };
 
@@ -164,7 +169,16 @@ function selectDice(index) {
     updateDiceTabs();
     loadDiceFaces();
     localStorage.setItem('lastDiceIndex', index);
-    
+
+    // 切换主题背景
+    const body = document.body;
+    // 移除所有主题类
+    DICE_CONFIG.forEach(dice => {
+        body.classList.remove(`theme-${dice.id}`);
+    });
+    // 添加新主题类
+    body.classList.add(`theme-${DICE_CONFIG[index].id}`);
+
     // 隐藏结果区
     document.getElementById('resultArea').style.display = 'none';
 }
