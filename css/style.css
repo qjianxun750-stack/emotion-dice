@@ -1088,32 +1088,15 @@ body::after {
     width: 375px;
     background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     border-radius: 30px;
-    padding: 50px 35px;
+    padding: 50px 35px 40px;
     color: white;
     text-align: center;
-    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
     position: relative;
     overflow: hidden;
 }
 
-.share-card::before {
-    content: '';
-    position: absolute;
-    top: -50%;
-    right: -50%;
-    width: 200%;
-    height: 200%;
-    background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 60%);
-    animation: rotate 10s linear infinite;
-}
-
-@keyframes rotate {
-    from { transform: rotate(0deg); }
-    to { transform: rotate(360deg); }
-}
-
 .share-header {
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .share-logo {
@@ -1122,7 +1105,7 @@ body::after {
 }
 
 .share-body {
-    margin-bottom: 40px;
+    margin-bottom: 30px;
 }
 
 .share-emoji {
@@ -1154,20 +1137,20 @@ body::after {
 
 .share-footer {
     border-top: 1px solid rgba(255,255,255,0.3);
-    padding: 25px 30px 30px;
+    padding: 30px 35px 35px;
 }
 
 .share-date {
     font-size: 14px;
     opacity: 0.8;
-    margin-bottom: 15px;
+    margin-bottom: 20px;
 }
 
 .share-qrcode-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
-    margin: 0 auto 15px;
+    margin: 0 auto 20px;
 }
 
 .share-qrcode {
@@ -1179,7 +1162,6 @@ body::after {
     align-items: center;
     justify-content: center;
     padding: 10px;
-    box-shadow: 0 2px 10px rgba(0,0,0,0.1);
 }
 
 .share-qrcode canvas,
