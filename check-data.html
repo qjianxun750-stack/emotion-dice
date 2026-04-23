@@ -1,0 +1,290 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>数据库状态检查</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: Arial, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .card {
+            background: white;
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 20px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 30px;
+            color: #333;
+        }
+
+        .status-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 15px 0;
+            border-bottom: 1px solid #eee;
+        }
+
+        .status-item:last-child {
+            border-bottom: none;
+        }
+
+        .status-label {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .status-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .status-icon {
+            font-size: 48px;
+            margin-right: 10px;
+        }
+
+        .success {
+            color: #28a745;
+        }
+
+        .error {
+            color: #dc3545;
+        }
+
+        .warning {
+            color: #ffc107;
+        }
+
+        .btn {
+            width: 100%;
+            padding: 15px;
+            background: #667eea;
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn:hover {
+            background: #5568d3;
+        }
+
+        .btn-success {
+            background: #28a745;
+        }
+
+        .btn-success:hover {
+            background: #218838;
+        }
+
+        .log {
+            background: #2d2d2d;
+            color: #f8f8f2;
+            padding: 20px;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 13px;
+            max-height: 300px;
+            overflow-y: auto;
+            margin-top: 20px;
+        }
+
+        .log-item {
+            margin-bottom: 5px;
+        }
+
+        .log-item.success {
+            color: #28a745;
+        }
+
+        .log-item.error {
+            color: #dc3545;
+        }
+
+        .log-item.info {
+            color: #17a2b8;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="card">
+            <h1>🔍 数据库状态检查</h1>
+
+            <div id="status">
+                <p style="text-align: center; color: #666;">正在检查...</p>
+            </div>
+
+            <div id="actions" style="display: none; margin-top: 20px;">
+                <button class="btn btn-success" onclick="window.location.href='inject-data.html'">
+                    🚀 添加测试数据
+                </button>
+                <button class="btn" onclick="window.location.href='data-center.html'">
+                    📊 打开数据中心
+                </button>
+            </div>
+        </div>
+
+        <div class="card">
+            <h3 style="margin-bottom: 15px;">📋 检查日志</h3>
+            <div class="log" id="log">
+                <div class="log-item info">开始检查...</div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        const SUPABASE_CONFIG = {
+            url: 'https://xwbhgojqgyaopqlhuqqd.supabase.co',
+            key: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inh3Ymhnb2pxZ3lhb3BxbGh1cXFkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzY4OTM3NTUsImV4cCI6MjA5MjQ2OTc1NX0.vOFf9Td2Id-fUC12SCOxMNwtaSScM9crDDCDLe7d8sU'
+        };
+
+        function addLog(message, type = 'info') {
+            const log = document.getElementById('log');
+            const item = document.createElement('div');
+            item.className = `log-item ${type}`;
+            item.textContent = `[${new Date().toLocaleTimeString()}] ${message}`;
+            log.appendChild(item);
+            log.scrollTop = log.scrollHeight;
+        }
+
+        async function checkDatabase() {
+            const statusDiv = document.getElementById('status');
+
+            try {
+                addLog('开始检查数据库连接...', 'info');
+
+                // 测试连接
+                addLog('测试 visitors 表...', 'info');
+                const visitorsResponse = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/visitors?select=id`, {
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.key,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                    }
+                });
+
+                addLog(`visitors 表响应状态: ${visitorsResponse.status}`, visitorsResponse.ok ? 'success' : 'error');
+
+                if (!visitorsResponse.ok) {
+                    throw new Error(`visitors 表访问失败: ${visitorsResponse.status}`);
+                }
+
+                const visitors = await visitorsResponse.json();
+                addLog(`visitors 表数据量: ${visitors.length}`, 'success');
+
+                // 检查其他表
+                addLog('测试 dice_rolls 表...', 'info');
+                const rollsResponse = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/dice_rolls?select=id`, {
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.key,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                    }
+                });
+
+                addLog(`dice_rolls 表响应状态: ${rollsResponse.status}`, rollsResponse.ok ? 'success' : 'error');
+                const rolls = await rollsResponse.json();
+                addLog(`dice_rolls 表数据量: ${rolls.length}`, 'success');
+
+                addLog('测试 shares 表...', 'info');
+                const sharesResponse = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/shares?select=id`, {
+                    headers: {
+                        'apikey': SUPABASE_CONFIG.key,
+                        'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                    }
+                });
+
+                addLog(`shares 表响应状态: ${sharesResponse.status}`, sharesResponse.ok ? 'success' : 'error');
+                const shares = await sharesResponse.json();
+                addLog(`shares 表数据量: ${shares.length}`, 'success');
+
+                // 显示结果
+                addLog('检查完成！', 'success');
+
+                const hasData = visitors.length > 0 || rolls.length > 0 || shares.length > 0;
+
+                statusDiv.innerHTML = `
+                    <div class="status-item">
+                        <div>
+                            <span class="status-icon">👥</span>
+                            <span class="status-label">独立访客</span>
+                        </div>
+                        <span class="status-value">${visitors.length}</span>
+                    </div>
+                    <div class="status-item">
+                        <div>
+                            <span class="status-icon">🎲</span>
+                            <span class="status-label">摇骰次数</span>
+                        </div>
+                        <span class="status-value">${rolls.length}</span>
+                    </div>
+                    <div class="status-item">
+                        <div>
+                            <span class="status-icon">📤</span>
+                            <span class="status-label">分享次数</span>
+                        </div>
+                        <span class="status-value">${shares.length}</span>
+                    </div>
+                    <div style="text-align: center; margin-top: 20px; padding: 15px; background: ${hasData ? '#d4edda' : '#fff3cd'}; border-radius: 10px;">
+                        <strong style="color: ${hasData ? '#155724' : '#856404'}; font-size: 18px;">
+                            ${hasData ? '✅ 数据库有数据' : '⚠️ 数据库为空'}
+                        </strong>
+                        <p style="color: ${hasData ? '#155724' : '#856404'}; margin-top: 10px;">
+                            ${hasData ? '可以正常使用数据中心' : '需要添加测试数据'}
+                        </p>
+                    </div>
+                `;
+
+                document.getElementById('actions').style.display = 'block';
+
+            } catch (error) {
+                addLog(`检查失败: ${error.message}`, 'error');
+                statusDiv.innerHTML = `
+                    <div style="text-align: center; padding: 30px;">
+                        <div style="font-size: 64px; margin-bottom: 20px;">❌</div>
+                        <h3 style="color: #dc3545; margin-bottom: 15px;">连接失败</h3>
+                        <p style="color: #666; margin-bottom: 20px;">${error.message}</p>
+                        <div style="background: #fff3cd; padding: 15px; border-radius: 8px; text-align: left;">
+                            <strong>可能的原因：</strong>
+                            <ul style="margin-top: 10px; margin-left: 20px;">
+                                <li>RLS 策略未正确配置</li>
+                                <li>API key 错误</li>
+                                <li>表不存在</li>
+                            </ul>
+                        </div>
+                    </div>
+                `;
+            }
+        }
+
+        // 页面加载后自动检查
+        window.onload = function() {
+            setTimeout(checkDatabase, 500);
+        };
+    </script>
+</body>
+</html>
