@@ -301,8 +301,13 @@
         </div>
     </div>
 
-    <script src="js/supabase-client.js"></script>
     <script>
+        // ========== Supabase配置 ==========
+        const SUPABASE_CONFIG = {
+            url: 'https://xwbhgojqgyaopqlhuqqd.supabase.co',
+            key: 'sb_publishable_JcgkknAzBdcpXaMCmWSBsg_ZHM3WHuu'
+        };
+
         // 数据缓存
         let allData = {
             rolls: [],
