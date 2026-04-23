@@ -25,6 +25,8 @@
     <link rel="stylesheet" href="css/style.css">
     <!-- 引入html2canvas用于生成分享图 -->
     <script src="https://cdn.jsdelivr.net/npm/html2canvas@1.4.1/dist/html2canvas.min.js"></script>
+    <!-- 引入qrcodejs用于生成二维码 -->
+    <script src="https://cdn.jsdelivr.net/npm/qrcodejs@1.0.0/qrcode.min.js"></script>
     <!-- 引入音效控制 -->
     <script src="js/audio.js"></script>
     <!-- 引入统计控制 -->
@@ -172,7 +174,7 @@
             </div>
             <div class="share-footer">
                 <div class="share-date" id="shareDate">2026-04-23</div>
-                <img class="share-qrcode-img" id="shareQRCode" src="" alt="二维码">
+                <div class="share-qrcode" id="shareQRCode"></div>
                 <div class="share-link">emotion-dice.vercel.app</div>
             </div>
         </div>
