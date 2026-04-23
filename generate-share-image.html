@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>生成分享图片</title>
+</head>
+<body>
+    <h1>正在生成分享图片...</h1>
+    <canvas id="canvas" width="1200" height="630" style="display:none;"></canvas>
+    <script>
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+
+        // 绘制背景渐变
+        const gradient = ctx.createLinearGradient(0, 0, 1200, 630);
+        gradient.addColorStop(0, '#667eea');
+        gradient.addColorStop(1, '#764ba2');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 1200, 630);
+
+        // 绘制星星装饰
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.6)';
+        ctx.beginPath();
+        ctx.arc(100, 100, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(1100, 150, 2, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(200, 500, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(1000, 450, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 绘制标题
+        ctx.fillStyle = '#ffffff';
+        ctx.font = 'bold 72px Arial, sans-serif';
+        ctx.textAlign = 'center';
+        ctx.fillText('🎲 情绪骰子', 600, 120);
+
+        ctx.font = '32px Arial, sans-serif';
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.fillText('摇一摇，看今天什么状态', 600, 190);
+
+        // 绘制骰子
+        const diceGradient = ctx.createLinearGradient(520, 270, 680, 430);
+        diceGradient.addColorStop(0, '#f093fb');
+        diceGradient.addColorStop(1, '#f5576c');
+
+        ctx.fillStyle = diceGradient;
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.3)';
+        ctx.shadowBlur = 20;
+        roundRect(ctx, 520, 270, 160, 160, 20);
+        ctx.fill();
+        ctx.shadowBlur = 0;
+
+        // 绘制骰子点数
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.beginPath();
+        ctx.arc(570, 320, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(630, 320, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(600, 350, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(570, 380, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(630, 380, 12, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 绘制问号
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.font = 'bold 80px Arial, sans-serif';
+        ctx.fillText('?', 600, 365);
+
+        // 绘制8个主题标签
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
+        ctx.font = '20px Arial, sans-serif';
+        const themes = ['今日状态', '发疯', '祈愿', '玄学', '关系', '人生', '妈妈', '搭子'];
+        const positions = [250, 350, 450, 550, 650, 750, 850, 950];
+
+        themes.forEach((theme, i) => {
+            ctx.fillText(theme, positions[i], 500);
+        });
+
+        // 绘制底部网址
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.7)';
+        ctx.font = '24px Arial, sans-serif';
+        ctx.fillText('emotion-dice.vercel.app', 600, 600);
+
+        // 装饰圆圈
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.05)';
+        ctx.beginPath();
+        ctx.arc(100, 315, 80, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.beginPath();
+        ctx.arc(1100, 315, 60, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 导出为PNG
+        const dataURL = canvas.toDataURL('image/png');
+
+        // 创建下载链接
+        const link = document.createElement('a');
+        link.download = 'share-image.png';
+        link.href = dataURL;
+        link.click();
+
+        console.log('图片已生成！');
+
+        function roundRect(ctx, x, y, width, height, radius) {
+            ctx.beginPath();
+            ctx.moveTo(x + radius, y);
+            ctx.lineTo(x + width - radius, y);
+            ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+            ctx.lineTo(x + width, y + height - radius);
+            ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+            ctx.lineTo(x + radius, y + height);
+            ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+            ctx.lineTo(x, y + radius);
+            ctx.quadraticCurveTo(x, y, x + radius, y);
+            ctx.closePath();
+        }
+    </script>
+</body>
+</html>
