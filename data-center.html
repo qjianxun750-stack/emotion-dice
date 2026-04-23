@@ -1,0 +1,623 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>📊 情绪骰子 - 数据中心</title>
+    <link rel="stylesheet" href="css/style.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: linear-gradient(-45deg, #667eea, #764ba2, #f093fb, #f5576c);
+            background-size: 400% 400%;
+            animation: gradientShift 15s ease infinite;
+            min-height: 100vh;
+            padding: 20px;
+            color: #333;
+        }
+
+        @keyframes gradientShift {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .header {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            margin-bottom: 30px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .header h1 {
+            font-size: 32px;
+            margin-bottom: 10px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+
+        .stats-summary {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .stat-box {
+            background: linear-gradient(135deg, #f8f9fa 0%, #e9ecef 100%);
+            border-radius: 12px;
+            padding: 15px;
+            text-align: center;
+        }
+
+        .stat-box .number {
+            font-size: 28px;
+            font-weight: bold;
+            color: #667eea;
+        }
+
+        .stat-box .label {
+            font-size: 12px;
+            color: #666;
+            margin-top: 5px;
+        }
+
+        .tabs {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .tab-btn {
+            padding: 12px 24px;
+            background: white;
+            border: 2px solid rgba(255,255,255,0.3);
+            border-radius: 25px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            color: #333;
+        }
+
+        .tab-btn:hover {
+            background: rgba(255,255,255,0.2);
+        }
+
+        .tab-btn.active {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: transparent;
+        }
+
+        .content-area {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(20px);
+            border-radius: 20px;
+            padding: 30px;
+            min-height: 400px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .data-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        .data-table th,
+        .data-table td {
+            padding: 12px;
+            text-align: left;
+            border-bottom: 1px solid #e0e0e0;
+        }
+
+        .data-table th {
+            background: #f8f9fa;
+            font-weight: 600;
+            font-size: 14px;
+            position: sticky;
+            top: 0;
+        }
+
+        .data-table tr:hover {
+            background: #f5f5f5;
+        }
+
+        .data-table td {
+            font-size: 13px;
+        }
+
+        .refresh-btn {
+            padding: 10px 20px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: transform 0.2s;
+        }
+
+        .refresh-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .refresh-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #666;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #999;
+        }
+
+        .empty-state-icon {
+            font-size: 64px;
+            margin-bottom: 20px;
+        }
+
+        .filter-bar {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar input,
+        .filter-bar select {
+            padding: 10px 15px;
+            border: 1px solid #ddd;
+            border-radius: 8px;
+            font-size: 14px;
+        }
+
+        .export-btn {
+            padding: 8px 16px;
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .emoji {
+            font-size: 24px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- 头部 -->
+        <div class="header">
+            <h1>📊 情绪骰子 - 数据中心</h1>
+            <p>查看所有用户的完整数据记录</p>
+
+            <div class="stats-summary" id="statsSummary">
+                <div class="stat-box">
+                    <div class="number" id="totalVisitors">-</div>
+                    <div class="label">独立访客</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="totalRolls">-</div>
+                    <div class="label">摇骰次数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="totalShares">-</div>
+                    <div class="label">分享次数</div>
+                </div>
+                <div class="stat-box">
+                    <div class="number" id="shareRate">-</div>
+                    <div class="label">转化率</div>
+                </div>
+            </div>
+        </div>
+
+        <!-- 标签页 -->
+        <div class="tabs">
+            <button class="tab-btn active" onclick="switchTab('rolls')">🎲 摇骰记录</button>
+            <button class="tab-btn" onclick="switchTab('shares')">📤 分享记录</button>
+            <button class="tab-btn" onclick="switchTab('visitors')">👥 访客记录</button>
+        </div>
+
+        <!-- 内容区 -->
+        <div class="content-area">
+            <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                <h3 id="tabTitle">🎲 摇骰记录</h3>
+                <div>
+                    <button class="export-btn" onclick="exportData()">📥 导出CSV</button>
+                    <button class="refresh-btn" onclick="loadData()" id="refreshBtn">🔄 刷新数据</button>
+                </div>
+            </div>
+
+            <!-- 摇骰记录 -->
+            <div id="rollsTab" class="tab-content active">
+                <div class="filter-bar">
+                    <select id="filterDice" onchange="filterData()">
+                        <option value="">所有主题</option>
+                    </select>
+                    <input type="text" id="searchRolls" placeholder="搜索结果..." oninput="filterData()">
+                </div>
+                <div id="rollsContent" class="loading">加载中...</div>
+            </div>
+
+            <!-- 分享记录 -->
+            <div id="sharesTab" class="tab-content">
+                <div class="filter-bar">
+                    <select id="filterShare" onchange="filterData()">
+                        <option value="">所有渠道</option>
+                        <option value="wechat">微信</option>
+                        <option value="qq">QQ</option>
+                        <option value="weibo">微博</option>
+                        <option value="link">复制链接</option>
+                        <option value="image">生成图片</option>
+                    </select>
+                </div>
+                <div id="sharesContent" class="loading">加载中...</div>
+            </div>
+
+            <!-- 访客记录 -->
+            <div id="visitorsTab" class="tab-content">
+                <div class="filter-bar">
+                    <select id="filterDevice" onchange="filterData()">
+                        <option value="">所有设备</option>
+                        <option value="mobile">手机</option>
+                        <option value="desktop">电脑</option>
+                    </select>
+                </div>
+                <div id="visitorsContent" class="loading">加载中...</div>
+            </div>
+        </div>
+    </div>
+
+    <script src="js/supabase-client.js"></script>
+    <script>
+        // 数据缓存
+        let allData = {
+            rolls: [],
+            shares: [],
+            visitors: []
+        };
+
+        // 当前标签
+        let currentTab = 'rolls';
+
+        // 页面加载
+        window.onload = function() {
+            loadData();
+        };
+
+        // 切换标签
+        function switchTab(tab) {
+            currentTab = tab;
+
+            // 更新按钮状态
+            document.querySelectorAll('.tab-btn').forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+
+            // 更新标题
+            const titles = {
+                'rolls': '🎲 摇骰记录',
+                'shares': '📤 分享记录',
+                'visitors': '👥 访客记录'
+            };
+            document.getElementById('tabTitle').textContent = titles[tab];
+
+            // 切换内容
+            document.querySelectorAll('.tab-content').forEach(content => content.classList.remove('active'));
+            document.getElementById(tab + 'Tab').classList.add('active');
+
+            // 显示数据
+            displayData(tab);
+        }
+
+        // 加载数据
+        async function loadData() {
+            const refreshBtn = document.getElementById('refreshBtn');
+            refreshBtn.disabled = true;
+            refreshBtn.textContent = '⏳ 加载中...';
+
+            try {
+                // 加载所有数据
+                const [visitors, rolls, shares] = await Promise.all([
+                    fetchFromSupabase('visitors'),
+                    fetchFromSupabase('dice_rolls'),
+                    fetchFromSupabase('shares')
+                ]);
+
+                allData.visitors = visitors || [];
+                allData.rolls = rolls || [];
+                allData.shares = shares || [];
+
+                // 更新统计
+                updateSummary();
+
+                // 填充筛选选项
+                populateFilters();
+
+                // 显示当前标签数据
+                displayData(currentTab);
+
+            } catch (error) {
+                console.error('加载数据失败:', error);
+                displayError('加载失败：' + error.message);
+            } finally {
+                refreshBtn.disabled = false;
+                refreshBtn.textContent = '🔄 刷新数据';
+            }
+        }
+
+        // 从Supabase获取数据
+        async function fetchFromSupabase(table) {
+            const response = await fetch(`${SUPABASE_CONFIG.url}/rest/v1/${table}?order=created_at.desc&limit=1000`, {
+                headers: {
+                    'apikey': SUPABASE_CONFIG.key,
+                    'Authorization': `Bearer ${SUPABASE_CONFIG.key}`
+                }
+            });
+
+            if (!response.ok) {
+                throw new Error(`HTTP ${response.status}`);
+            }
+
+            return await response.json();
+        }
+
+        // 更新统计摘要
+        function updateSummary() {
+            document.getElementById('totalVisitors').textContent = allData.visitors.length;
+            document.getElementById('totalRolls').textContent = allData.rolls.length;
+            document.getElementById('totalShares').textContent = allData.shares.length;
+
+            const rate = allData.rolls.length > 0
+                ? ((allData.shares.length / allData.rolls.length) * 100).toFixed(1)
+                : 0;
+            document.getElementById('shareRate').textContent = rate + '%';
+        }
+
+        // 填充筛选选项
+        function populateFilters() {
+            // 主题筛选
+            const diceNames = [...new Set(allData.rolls.map(r => r.dice_name))];
+            const filterDice = document.getElementById('filterDice');
+            filterDice.innerHTML = '<option value="">所有主题</option>' +
+                diceNames.map(name => `<option value="${name}">${name}</option>`).join('');
+
+            // 设备筛选已经在HTML中定义
+        }
+
+        // 显示数据
+        function displayData(tab) {
+            const container = document.getElementById(tab + 'Content');
+            const data = allData[tab] || [];
+
+            if (data.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">📭</div>
+                        <p>暂无数据</p>
+                        <p style="font-size: 12px; color: #ccc;">使用情绪骰子后数据会自动记录</p>
+                    </div>
+                `;
+                return;
+            }
+
+            let html = '<table class="data-table"><thead><tr>';
+
+            // 根据不同标签设置表头
+            if (tab === 'rolls') {
+                html += `
+                    <th>时间</th>
+                    <th>访客ID</th>
+                    <th>主题</th>
+                    <th>结果</th>
+                    <th>emoji</th>
+                `;
+            } else if (tab === 'shares') {
+                html += `
+                    <th>时间</th>
+                    <th>访客ID</th>
+                    <th>渠道</th>
+                    <th>主题</th>
+                    <th>结果</th>
+                `;
+            } else if (tab === 'visitors') {
+                html += `
+                    <th>首次访问</th>
+                    <th>访客ID</th>
+                    <th>设备</th>
+                    <th>最后访问</th>
+                `;
+            }
+
+            html += '</tr></thead><tbody>';
+
+            data.forEach(item => {
+                html += '<tr>';
+
+                if (tab === 'rolls') {
+                    const time = new Date(item.created_at).toLocaleString('zh-CN');
+                    html += `
+                        <td>${time}</td>
+                        <td><span style="font-size: 11px; color: #999;">${item.visitor_id.substring(0, 20)}...</span></td>
+                        <td>${item.dice_name}</td>
+                        <td>${item.result_word}</td>
+                        <td>${item.result_emoji}</td>
+                    `;
+                } else if (tab === 'shares') {
+                    const time = new Date(item.created_at).toLocaleString('zh-CN');
+                    const shareTypeNames = {
+                        wechat: '微信',
+                        qq: 'QQ',
+                        weibo: '微博',
+                        link: '复制链接',
+                        image: '生成图片'
+                    };
+                    html += `
+                        <td>${time}</td>
+                        <td><span style="font-size: 11px; color: #999;">${item.visitor_id.substring(0, 20)}...</span></td>
+                        <td>${shareTypeNames[item.share_type] || item.share_type}</td>
+                        <td>${item.dice_name || '-'}</td>
+                        <td>${item.result_word || '-'}</td>
+                    `;
+                } else if (tab === 'visitors') {
+                    const firstVisit = new Date(item.first_visit).toLocaleString('zh-CN');
+                    const lastVisit = new Date(item.last_visit).toLocaleString('zh-CN');
+                    const deviceNames = {
+                        mobile: '手机',
+                        desktop: '电脑'
+                    };
+                    html += `
+                        <td>${firstVisit}</td>
+                        <td><span style="font-size: 11px; color: #999;">${item.visitor_id.substring(0, 20)}...</span></td>
+                        <td>${deviceNames[item.device_type] || item.device_type}</td>
+                        <td>${lastVisit}</td>
+                    `;
+                }
+
+                html += '</tr>';
+            });
+
+            html += '</tbody></table>';
+            container.innerHTML = html;
+        }
+
+        // 筛选数据
+        function filterData() {
+            let filteredData = [...allData[currentTab]];
+
+            // 根据当前标签应用筛选
+            if (currentTab === 'rolls') {
+                const filterDice = document.getElementById('filterDice').value;
+                const searchTerm = document.getElementById('searchRolls').value.toLowerCase();
+
+                if (filterDice) {
+                    filteredData = filteredData.filter(item => item.dice_name === filterDice);
+                }
+
+                if (searchTerm) {
+                    filteredData = filteredData.filter(item =>
+                        item.result_word.toLowerCase().includes(searchTerm) ||
+                        item.result_desc?.toLowerCase().includes(searchTerm)
+                    );
+                }
+            } else if (currentTab === 'shares') {
+                const filterShare = document.getElementById('filterShare').value;
+
+                if (filterShare) {
+                    filteredData = filteredData.filter(item => item.share_type === filterShare);
+                }
+            } else if (currentTab === 'visitors') {
+                const filterDevice = document.getElementById('filterDevice').value;
+
+                if (filterDevice) {
+                    filteredData = filteredData.filter(item => item.device_type === filterDevice);
+                }
+            }
+
+            // 显示筛选后的数据
+            const container = document.getElementById(currentTab + 'Content');
+            if (filteredData.length === 0) {
+                container.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">🔍</div>
+                        <p>没有找到匹配的数据</p>
+                    </div>
+                `;
+                return;
+            }
+
+            // 重新渲染表格
+            allData[currentTab] = filteredData;
+            displayData(currentTab);
+        }
+
+        // 导出数据
+        function exportData() {
+            const data = allData[currentTab];
+            if (!data || data.length === 0) {
+                alert('没有数据可导出');
+                return;
+            }
+
+            // 转换为CSV
+            let csv = '';
+
+            if (currentTab === 'rolls') {
+                csv = '时间,访客ID,主题,结果,emoji\n';
+                data.forEach(item => {
+                    csv += `"${new Date(item.created_at).toLocaleString('zh-CN')}","${item.visitor_id}","${item.dice_name}","${item.result_word}","${item.result_emoji}"\n`;
+                });
+            } else if (currentTab === 'shares') {
+                const shareTypeNames = {
+                    wechat: '微信',
+                    qq: 'QQ',
+                    weibo: '微博',
+                    link: '复制链接',
+                    image: '生成图片'
+                };
+                csv = '时间,访客ID,渠道,主题,结果\n';
+                data.forEach(item => {
+                    csv += `"${new Date(item.created_at).toLocaleString('zh-CN')}","${item.visitor_id}","${shareTypeNames[item.share_type] || item.share_type}","${item.dice_name || '-'}","${item.result_word || '-'}"\n`;
+                });
+            } else if (currentTab === 'visitors') {
+                csv = '首次访问,访客ID,设备,最后访问\n';
+                data.forEach(item => {
+                    csv += `"${new Date(item.first_visit).toLocaleString('zh-CN')}","${item.visitor_id}","${item.device_type}","${new Date(item.last_visit).toLocaleString('zh-CN')}"\n`;
+                });
+            }
+
+            // 下载CSV文件
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const url = URL.createObjectURL(blob);
+            const link = document.createElement('a');
+            link.href = url;
+            link.download = `情绪骰子-${currentTab}-${new Date().toISOString().split('T')[0]}.csv`;
+            link.click();
+            URL.revokeObjectURL(url);
+        }
+
+        // 显示错误
+        function displayError(message) {
+            const container = document.getElementById(currentTab + 'Content');
+            container.innerHTML = `
+                <div class="empty-state" style="color: #e74c3c;">
+                    <div class="empty-state-icon">⚠️</div>
+                    <p>${message}</p>
+                </div>
+            `;
+        }
+    </script>
+</body>
+</html>
