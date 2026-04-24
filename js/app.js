@@ -456,28 +456,43 @@ function loadComboDiceFaces() {
     for (let i = 0; i < 3; i++) {
         const subDice = combo.combo[i];
         const face = subDice.faces[0]; // 默认显示第一个面
-        document.getElementById(`emoji${i+1}`).textContent = face.emoji;
-        document.getElementById(`word${i+1}`).textContent = face.word;
+        document.getElementById(`comboEmoji${i+1}`).textContent = face.emoji;
+        document.getElementById(`comboWord${i+1}`).textContent = face.word;
     }
 }
 
 // ========== 更新骰子区域 ==========
 function updateDiceArea() {
-    const diceArea = document.querySelector('.dice-area');
-    const diceContainer = document.getElementById('diceContainer');
+    const singleDiceArea = document.getElementById('singleDiceArea');
+    const comboDiceArea = document.getElementById('comboDiceArea');
     const diceHint = document.getElementById('diceHint');
 
     if (currentMode === 'single' && currentDiceIndex >= 0) {
         // 单骰子模式
         const dice = DICE_CONFIG[currentDiceIndex];
+        singleDiceArea.style.display = 'block';
+        comboDiceArea.style.display = 'none';
+        comboDiceArea.classList.remove('active');
         diceHint.textContent = `点击骰子摇一摇`;
         loadDiceFaces();
     } else if (currentMode === 'combo' && currentComboIndex >= 0) {
         // 组合骰子模式
         const combo = DICE_CONFIG[currentComboIndex];
-        diceHint.textContent = `点击摇一摇，摇出${combo.name}`;
+        singleDiceArea.style.display = 'none';
+        comboDiceArea.style.display = 'block';
+        comboDiceArea.classList.add('active');
+
+        // 更新组合骰子标签
+        document.getElementById('comboLabel1').textContent = combo.subNames[0];
+        document.getElementById('comboLabel2').textContent = combo.subNames[1];
+        document.getElementById('comboLabel3').textContent = combo.subNames[2];
+
+        // 初始化骰子面
         loadComboDiceFaces();
     } else {
+        singleDiceArea.style.display = 'block';
+        comboDiceArea.style.display = 'none';
+        comboDiceArea.classList.remove('active');
         diceHint.textContent = '请先选择骰子';
     }
 }
@@ -598,66 +613,83 @@ function showResult(result) {
 
 // ========== 组合骰子摇骰 ==========
 function rollComboDice() {
+    if (isRolling) return;
     isRolling = true;
-    const dice = document.getElementById('dice');
-    const hint = document.getElementById('diceHint');
+
+    const combo = DICE_CONFIG[currentComboIndex];
+    const rollBtn = document.getElementById('comboRollBtn');
 
     // 隐藏结果区
     document.getElementById('resultArea').style.display = 'none';
+    document.querySelector('.combo-result')?.classList.remove('active');
 
-    const combo = DICE_CONFIG[currentComboIndex];
-
-    // 先抛起
-    dice.classList.add('tossing');
-    hint.textContent = `🎲 ${combo.name} 骰子飞起...`;
+    // 禁用按钮
+    rollBtn.disabled = true;
+    rollBtn.textContent = '🎲 摇骰中...';
 
     // 播放音效
     AudioController.playRoll();
 
-    // 0.8秒后开始翻转
-    setTimeout(() => {
-        dice.classList.remove('tossing');
-        dice.classList.add('rolling');
-        hint.textContent = '🎲 转动中...';
+    // 三个骰子依次开始滚动
+    const diceElements = [
+        document.getElementById('comboDice1'),
+        document.getElementById('comboDice2'),
+        document.getElementById('comboDice3')
+    ];
 
-        // 2秒后显示结果
+    // 为3个子骰子各随机选择一个面
+    const comboResults = [];
+    for (let i = 0; i < 3; i++) {
+        const faceIndex = Math.floor(Math.random() * 6);
+        const result = combo.combo[i].faces[faceIndex];
+        comboResults.push({
+            ...result,
+            subName: combo.combo[i].name,
+            subId: combo.combo[i].subId
+        });
+    }
+
+    // 依次启动三个骰子的滚动动画
+    diceElements.forEach((dice, index) => {
         setTimeout(() => {
+            // 添加抛起动画
+            dice.classList.add('tossing');
+
+            setTimeout(() => {
+                // 抛起完成后开始滚动
+                dice.classList.remove('tossing');
+                dice.classList.add('rolling');
+            }, 800);
+
+        }, index * 200); // 每个骰子延迟200ms启动
+    });
+
+    // 依次停止三个骰子（关键！要有先后顺序）
+    diceElements.forEach((dice, index) => {
+        setTimeout(() => {
+            // 停止滚动
             dice.classList.remove('rolling');
 
-            // 为3个子骰子各随机选择一个面
-            const comboResults = [];
-            for (let i = 0; i < 3; i++) {
-                const faceIndex = Math.floor(Math.random() * 6);
-                const result = combo.combo[i].faces[faceIndex];
-                comboResults.push({
-                    ...result,
-                    subName: combo.combo[i].name,
-                    subId: combo.combo[i].subId
-                });
-            }
-
             // 更新骰子面显示
-            for (let i = 0; i < 3; i++) {
-                document.getElementById(`emoji${i+1}`).textContent = comboResults[i].emoji;
-                document.getElementById(`word${i+1}`).textContent = comboResults[i].word;
+            document.getElementById(`comboEmoji${index + 1}`).textContent = comboResults[index].emoji;
+            document.getElementById(`comboWord${index + 1}`).textContent = comboResults[index].word;
+
+            // 播放结果音效（最后一个骰子停止时）
+            if (index === 2) {
+                AudioController.playResult();
+                createParticles();
+                createConfetti();
+
+                // 显示结果
+                setTimeout(() => {
+                    showComboResult(comboResults, combo);
+                    isRolling = false;
+                    rollBtn.disabled = false;
+                    rollBtn.textContent = '🎲 再摇一次';
+                }, 500);
             }
-
-            // 显示组合结果
-            showComboResult(comboResults, combo);
-
-            // 播放结果音效
-            AudioController.playResult();
-
-            // 触发粒子特效
-            createParticles();
-            createConfetti();
-
-            // 保存到历史
-            saveComboToHistory(comboResults, combo);
-
-            isRolling = false;
-        }, 2000);
-    }, 800);
+        }, 2000 + (index * 600)); // 第一个骰子2秒后停止，之后每个骰子延迟600ms停止
+    });
 }
 
 // ========== 显示组合结果 ==========
@@ -665,65 +697,29 @@ function showComboResult(results, combo) {
     // 生成解签文案
     const interpretation = generateInterpretation(results, combo);
 
-    const resultArea = document.getElementById('resultArea');
+    // 更新结果卡片
+    const cardsContainer = document.getElementById('comboResultCards');
+    cardsContainer.innerHTML = results.map((result, index) => `
+        <div class="combo-result-card">
+            <div class="combo-result-label">${combo.subNames[index]}</div>
+            <div class="combo-result-emoji">${result.emoji}</div>
+            <div class="combo-result-word">${result.word}</div>
+        </div>
+    `).join('');
 
-    // 创建分享图内容
-    const shareCard = document.getElementById('shareCard');
+    // 更新解签文案
+    document.getElementById('comboInterpretation').textContent = interpretation;
 
-    // 更新分享卡片内容
-    document.getElementById('shareEmoji').textContent = results.map(r => r.emoji).join(' + ');
-    document.getElementById('shareWord').textContent = results.map(r => r.word).join(' + ');
-    document.getElementById('shareDesc').textContent = interpretation;
-    document.getElementById('shareDiceName').textContent = combo.name;
-    document.getElementById('shareDate').textContent = new Date().toLocaleDateString('zh-CN');
+    // 显示结果区域
+    const resultDiv = document.getElementById('comboResult');
+    resultDiv.classList.add('active');
 
-    // 生成并显示分享图
-    setTimeout(async () => {
-        try {
-            const canvas = document.getElementById('shareCanvas');
-            const card = document.getElementById('shareCard');
-
-            // 生成二维码
-            document.getElementById('shareQRCode').innerHTML = '';
-            new QRCode(document.getElementById('shareQRCode'), {
-                text: window.location.href,
-                width: 80,
-                height: 80,
-                colorDark: '#667eea',
-                colorLight: '#ffffff',
-                correctLevel: QRCode.CorrectLevel.H
-            });
-
-            // 等待二维码生成
-            await new Promise(resolve => setTimeout(resolve, 500));
-
-            // 使用html2canvas生成图片
-            const shareImage = await html2canvas(card, {
-                backgroundColor: null,
-                scale: 2,
-                useCORS: true,
-                logging: false
-            });
-
-            // 显示结果
-            resultArea.style.display = 'block';
-            const imgElement = document.getElementById('shareImageResult');
-            imgElement.src = shareImage.toDataURL('image/png');
-
-            // 滚动到结果区
-            resultArea.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-        } catch (error) {
-            console.error('生成分享图失败:', error);
-            // 失败时显示文本结果
-            resultArea.style.display = 'block';
-            document.getElementById('shareImageResult').alt = interpretation;
-        }
-    }, 100);
+    // 滚动到结果区
+    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
 
     // 记录统计
     try {
-        GlobalStatsController.recordRoll(combo.id, combo.name, results[0].word, results[0].emoji, interpretation);
+        GlobalStatsController.recordRoll(combo.id, combo.name, results.map(r => r.word).join('+'), results.map(r => r.emoji).join('+'), interpretation);
     } catch (e) {
         console.warn('全局统计记录失败:', e);
     }
@@ -782,6 +778,11 @@ function saveComboToHistory(results, combo) {
     } catch (e) {
         console.warn('历史记录保存失败:', e);
     }
+}
+
+// ========== 复制组合骰子图片 ==========
+function copyComboImage() {
+    alert('分享功能开发中，先截图保存吧！');
 }
 
 // ========== 单骰子再摇一次 ==========
