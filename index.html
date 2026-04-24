@@ -125,80 +125,120 @@
             <p class="dice-hint" id="diceHint">点击骰子摇一摇</p>
         </div>
 
-        <!-- 组合骰子区域 - 老虎机风格 -->
+        <!-- 组合骰子区域 -->
         <div class="combo-dice-area" id="comboDiceArea">
-            <p class="dice-hint" id="comboDiceHint">点击按钮开始摇卦</p>
+            <p class="dice-hint" id="comboDiceHint">选择一套组合</p>
 
-            <!-- 老虎机主体 -->
-            <div class="slot-machine">
-                <!-- 顶部装饰 -->
-                <div class="slot-machine-header">
-                    <div class="slot-machine-title" id="slotMachineTitle">今日一卦</div>
-                </div>
-
-                <!-- 滚轮区域 -->
-                <div class="slot-machine-reels">
-                    <!-- 滚轮1 -->
-                    <div class="reel-wrapper">
-                        <div class="reel-label" id="reelLabel1">因</div>
-                        <div class="reel">
-                            <div class="reel-strip" id="reelStrip1">
-                                <!-- 动态填充6个面 -->
+            <!-- 3个骰子展示区 -->
+            <div class="three-dice-container" id="threeDiceContainer">
+                <!-- 骰子1 -->
+                <div class="single-dice-wrapper">
+                    <div class="dice-label" id="diceLabel1">-</div>
+                    <div class="dice-container" id="diceContainer1">
+                        <div class="dice" id="dice1">
+                            <div class="dice-face face-1">
+                                <span class="face-emoji" id="d1Emoji1">🎲</span>
+                                <span class="face-word" id="d1Word1">?</span>
                             </div>
-                        </div>
-                        <div class="reel-window">
-                            <div class="reel-result">
-                                <span class="reel-emoji" id="reel1Emoji">🎲</span>
-                                <span class="reel-word" id="reel1Word">?</span>
+                            <div class="dice-face face-2">
+                                <span class="face-emoji" id="d1Emoji2">🎲</span>
+                                <span class="face-word" id="d1Word2">?</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- 滚轮2 -->
-                    <div class="reel-wrapper">
-                        <div class="reel-label" id="reelLabel2">态</div>
-                        <div class="reel">
-                            <div class="reel-strip" id="reelStrip2">
-                                <!-- 动态填充6个面 -->
+                            <div class="dice-face face-3">
+                                <span class="face-emoji" id="d1Emoji3">🎲</span>
+                                <span class="face-word" id="d1Word3">?</span>
                             </div>
-                        </div>
-                        <div class="reel-window">
-                            <div class="reel-result">
-                                <span class="reel-emoji" id="reel2Emoji">🎲</span>
-                                <span class="reel-word" id="reel2Word">?</span>
+                            <div class="dice-face face-4">
+                                <span class="face-emoji" id="d1Emoji4">🎲</span>
+                                <span class="face-word" id="d1Word4">?</span>
                             </div>
-                        </div>
-                    </div>
-
-                    <!-- 滚轮3 -->
-                    <div class="reel-wrapper">
-                        <div class="reel-label" id="reelLabel3">果</div>
-                        <div class="reel">
-                            <div class="reel-strip" id="reelStrip3">
-                                <!-- 动态填充6个面 -->
+                            <div class="dice-face face-5">
+                                <span class="face-emoji" id="d1Emoji5">🎲</span>
+                                <span class="face-word" id="d1Word5">?</span>
                             </div>
-                        </div>
-                        <div class="reel-window">
-                            <div class="reel-result">
-                                <span class="reel-emoji" id="reel3Emoji">🎲</span>
-                                <span class="reel-word" id="reel3Word">?</span>
+                            <div class="dice-face face-6">
+                                <span class="face-emoji" id="d1Emoji6">🎲</span>
+                                <span class="face-word" id="d1Word6">?</span>
                             </div>
                         </div>
                     </div>
                 </div>
 
-                <!-- 底部控制区 -->
-                <div class="slot-machine-controls">
-                    <button class="slot-machine-btn" id="slotMachineBtn" onclick="rollSlotMachine()">
-                        <span class="btn-icon">🎰</span>
-                        <span class="btn-text">开始摇卦</span>
-                    </button>
+                <!-- 骰子2 -->
+                <div class="single-dice-wrapper">
+                    <div class="dice-label" id="diceLabel2">-</div>
+                    <div class="dice-container" id="diceContainer2">
+                        <div class="dice" id="dice2">
+                            <div class="dice-face face-1">
+                                <span class="face-emoji" id="d2Emoji1">🎲</span>
+                                <span class="face-word" id="d2Word1">?</span>
+                            </div>
+                            <div class="dice-face face-2">
+                                <span class="face-emoji" id="d2Emoji2">🎲</span>
+                                <span class="face-word" id="d2Word2">?</span>
+                            </div>
+                            <div class="dice-face face-3">
+                                <span class="face-emoji" id="d2Emoji3">🎲</span>
+                                <span class="face-word" id="d2Word3">?</span>
+                            </div>
+                            <div class="dice-face face-4">
+                                <span class="face-emoji" id="d2Emoji4">🎲</span>
+                                <span class="face-word" id="d2Word4">?</span>
+                            </div>
+                            <div class="dice-face face-5">
+                                <span class="face-emoji" id="d2Emoji5">🎲</span>
+                                <span class="face-word" id="d2Word5">?</span>
+                            </div>
+                            <div class="dice-face face-6">
+                                <span class="face-emoji" id="d2Emoji6">🎲</span>
+                                <span class="face-word" id="d2Word6">?</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
 
-                <!-- 解签区 -->
-                <div class="slot-machine-result" id="slotMachineResult">
-                    <div class="interpretation-text" id="interpretationText"></div>
+                <!-- 骰子3 -->
+                <div class="single-dice-wrapper">
+                    <div class="dice-label" id="diceLabel3">-</div>
+                    <div class="dice-container" id="diceContainer3">
+                        <div class="dice" id="dice3">
+                            <div class="dice-face face-1">
+                                <span class="face-emoji" id="d3Emoji1">🎲</span>
+                                <span class="face-word" id="d3Word1">?</span>
+                            </div>
+                            <div class="dice-face face-2">
+                                <span class="face-emoji" id="d3Emoji2">🎲</span>
+                                <span class="face-word" id="d3Word2">?</span>
+                            </div>
+                            <div class="dice-face face-3">
+                                <span class="face-emoji" id="d3Emoji3">🎲</span>
+                                <span class="face-word" id="d3Word3">?</span>
+                            </div>
+                            <div class="dice-face face-4">
+                                <span class="face-emoji" id="d3Emoji4">🎲</span>
+                                <span class="face-word" id="d3Word4">?</span>
+                            </div>
+                            <div class="dice-face face-5">
+                                <span class="face-emoji" id="d3Emoji5">🎲</span>
+                                <span class="face-word" id="d3Word5">?</span>
+                            </div>
+                            <div class="dice-face face-6">
+                                <span class="face-emoji" id="d3Emoji6">🎲</span>
+                                <span class="face-word" id="d3Word6">?</span>
+                            </div>
+                        </div>
+                    </div>
                 </div>
+            </div>
+
+            <!-- 摇骰按钮 -->
+            <div class="combo-roll-container">
+                <button class="combo-roll-button" id="comboRollButton" onclick="rollThreeDice()">🎲 摇一摇</button>
+            </div>
+
+            <!-- 解签文案 -->
+            <div class="combo-interpretation-area" id="comboInterpretation">
+                <div class="interpretation-content" id="interpretationContent"></div>
             </div>
         </div>
 

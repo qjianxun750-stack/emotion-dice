@@ -458,20 +458,19 @@ function updateDiceArea() {
         diceHint.textContent = `点击骰子摇一摇`;
         loadDiceFaces();
     } else if (currentMode === 'combo' && currentComboIndex >= 0) {
-        // 组合骰子模式 - 老虎机风格
+        // 组合骰子模式
         const combo = DICE_CONFIG[currentComboIndex];
         singleDiceArea.style.display = 'none';
         comboDiceArea.style.display = 'block';
         comboDiceArea.classList.add('active');
 
-        // 更新标题和标签
-        document.getElementById('slotMachineTitle').textContent = combo.name;
-        document.getElementById('reelLabel1').textContent = combo.subNames[0];
-        document.getElementById('reelLabel2').textContent = combo.subNames[1];
-        document.getElementById('reelLabel3').textContent = combo.subNames[2];
+        // 更新标签
+        document.getElementById('diceLabel1').textContent = combo.subNames[0];
+        document.getElementById('diceLabel2').textContent = combo.subNames[1];
+        document.getElementById('diceLabel3').textContent = combo.subNames[2];
 
-        // 初始化滚轮数据
-        initSlotMachine();
+        // 初始化3个骰子
+        initThreeDice();
     } else {
         singleDiceArea.style.display = 'block';
         comboDiceArea.style.display = 'none';
@@ -480,49 +479,43 @@ function updateDiceArea() {
     }
 }
 
-// ========== 初始化老虎机滚轮 ==========
-function initSlotMachine() {
+// ========== 初始化3个骰子 ==========
+function initThreeDice() {
     const combo = DICE_CONFIG[currentComboIndex];
 
-    // 为每个滚轮填充数据
+    // 为3个骰子填充数据
     for (let i = 0; i < 3; i++) {
-        const strip = document.getElementById(`reelStrip${i + 1}`);
         const faces = combo.combo[i].faces;
-
-        // 创建6个面的HTML
-        strip.innerHTML = faces.map(face => `
-            <div style="height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px;">
-                <span style="font-size: 42px;">${face.emoji}</span>
-                <span style="font-size: 14px; font-weight: bold; color: #ffd700;">${face.word}</span>
-            </div>
-        `).join('');
+        for (let j = 0; j < 6; j++) {
+            document.getElementById(`d${i + 1}Emoji${j + 1}`).textContent = faces[j].emoji;
+            document.getElementById(`d${i + 1}Word${j + 1}`).textContent = faces[j].word;
+        }
     }
 
-    // 重置结果显示
-    document.getElementById('slotMachineResult').classList.remove('show');
-    document.getElementById('interpretationText').textContent = '';
+    // 重置解签
+    document.getElementById('comboInterpretation').classList.remove('show');
 }
 
-// ========== 老虎机摇卦 ==========
-function rollSlotMachine() {
+// ========== 摇3个骰子 ==========
+function rollThreeDice() {
     if (isRolling) return;
     isRolling = true;
 
     const combo = DICE_CONFIG[currentComboIndex];
-    const btn = document.getElementById('slotMachineBtn');
-    const resultDiv = document.getElementById('slotMachineResult');
+    const btn = document.getElementById('comboRollButton');
+    const interpretationArea = document.getElementById('comboInterpretation');
 
-    // 隐藏结果
-    resultDiv.classList.remove('show');
+    // 隐藏之前的解签
+    interpretationArea.classList.remove('show');
 
     // 禁用按钮
     btn.disabled = true;
-    btn.querySelector('.btn-text').textContent = '摇卦中...';
+    btn.textContent = '🎲 摇骰中...';
 
     // 播放音效
     AudioController.playRoll();
 
-    // 为3个滚轮随机选择结果
+    // 为3个骰子随机选择结果
     const results = [];
     for (let i = 0; i < 3; i++) {
         const faceIndex = Math.floor(Math.random() * 6);
@@ -533,24 +526,37 @@ function rollSlotMachine() {
         });
     }
 
-    // 3个滚轮同时开始滚动
-    for (let i = 1; i <= 3; i++) {
-        const strip = document.getElementById(`reelStrip${i}`);
-        strip.classList.add('spinning');
-    }
+    // 3个骰子元素
+    const diceElements = [
+        document.getElementById('dice1'),
+        document.getElementById('dice2'),
+        document.getElementById('dice3')
+    ];
 
-    // 依次停止滚轮（关键！）
-    for (let i = 0; i < 3; i++) {
+    // 同时启动3个骰子
+    diceElements.forEach((dice) => {
+        // 抛起动画
+        dice.classList.add('tossing');
+
         setTimeout(() => {
-            const strip = document.getElementById(`reelStrip${i + 1}`);
-            strip.classList.remove('spinning');
+            dice.classList.remove('tossing');
+            dice.classList.add('rolling');
+        }, 800);
+    });
 
-            // 更新结果显示
-            document.getElementById(`reel${i + 1}Emoji`).textContent = results[i].emoji;
-            document.getElementById(`reel${i + 1}Word`).textContent = results[i].word;
+    // 依次停止骰子
+    diceElements.forEach((dice, index) => {
+        setTimeout(() => {
+            // 停止滚动
+            dice.classList.remove('rolling');
 
-            // 最后一个滚轮停止后，播放音效和特效
-            if (i === 2) {
+            // 计算最终旋转角度
+            const faceIndex = combo.combo[index].faces.findIndex(f => f.word === results[index].word);
+            const finalRotation = calculateFinalRotation(faceIndex);
+            dice.style.transform = finalRotation;
+
+            // 最后一个骰子停止后
+            if (index === 2) {
                 AudioController.playResult();
                 createParticles();
                 createConfetti();
@@ -558,8 +564,8 @@ function rollSlotMachine() {
                 // 显示解签
                 setTimeout(() => {
                     const interpretation = generateInterpretation(results, combo);
-                    document.getElementById('interpretationText').textContent = interpretation;
-                    resultDiv.classList.add('show');
+                    document.getElementById('interpretationContent').textContent = interpretation;
+                    interpretationArea.classList.add('show');
 
                     // 保存到历史
                     saveComboToHistory(results, combo);
@@ -567,11 +573,11 @@ function rollSlotMachine() {
                     // 恢复按钮
                     isRolling = false;
                     btn.disabled = false;
-                    btn.querySelector('.btn-text').textContent = '再摇一次';
+                    btn.textContent = '🎲 摇一摇';
                 }, 500);
             }
-        }, 2000 + (i * 600)); // 第一个2秒后停止，之后每个延迟600ms
-    }
+        }, 2000 + (index * 600)); // 依次停止
+    });
 }
 
 // ========== 修改原有的初始化函数 ==========
@@ -690,7 +696,7 @@ function showResult(result) {
 
 // ========== 组合骰子摇骰 ==========
 function rollComboDice() {
-    rollSlotMachine();
+    rollThreeDice();
 }
 
 // ========== 生成解签文案 ==========
