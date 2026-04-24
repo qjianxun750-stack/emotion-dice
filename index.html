@@ -127,36 +127,108 @@
 
         <!-- 组合骰子区域 -->
         <div class="combo-dice-area" id="comboDiceArea">
+            <p class="dice-hint" id="comboDiceHint">点击下方任意骰子摇一摇</p>
+
             <div class="combo-dice-container">
+                <!-- 骰子1 -->
                 <div class="combo-dice-wrapper">
                     <div class="combo-dice-label" id="comboLabel1">因</div>
-                    <div class="combo-dice" id="comboDice1">
-                        <div class="combo-dice-face">
-                            <span class="emoji" id="comboEmoji1">🎲</span>
-                            <span class="word" id="comboWord1">?</span>
+                    <div class="dice-container" id="comboDiceContainer1">
+                        <div class="dice" id="comboDice1">
+                            <div class="dice-face face-1">
+                                <span class="face-emoji" id="combo1Emoji1">🎲</span>
+                                <span class="face-word" id="combo1Word1">?</span>
+                            </div>
+                            <div class="dice-face face-2">
+                                <span class="face-emoji" id="combo1Emoji2">🎲</span>
+                                <span class="face-word" id="combo1Word2">?</span>
+                            </div>
+                            <div class="dice-face face-3">
+                                <span class="face-emoji" id="combo1Emoji3">🎲</span>
+                                <span class="face-word" id="combo1Word3">?</span>
+                            </div>
+                            <div class="dice-face face-4">
+                                <span class="face-emoji" id="combo1Emoji4">🎲</span>
+                                <span class="face-word" id="combo1Word4">?</span>
+                            </div>
+                            <div class="dice-face face-5">
+                                <span class="face-emoji" id="combo1Emoji5">🎲</span>
+                                <span class="face-word" id="combo1Word5">?</span>
+                            </div>
+                            <div class="dice-face face-6">
+                                <span class="face-emoji" id="combo1Emoji6">🎲</span>
+                                <span class="face-word" id="combo1Word6">?</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- 骰子2 -->
                 <div class="combo-dice-wrapper">
                     <div class="combo-dice-label" id="comboLabel2">态</div>
-                    <div class="combo-dice" id="comboDice2">
-                        <div class="combo-dice-face">
-                            <span class="emoji" id="comboEmoji2">🎲</span>
-                            <span class="word" id="comboWord2">?</span>
+                    <div class="dice-container" id="comboDiceContainer2">
+                        <div class="dice" id="comboDice2">
+                            <div class="dice-face face-1">
+                                <span class="face-emoji" id="combo2Emoji1">🎲</span>
+                                <span class="face-word" id="combo2Word1">?</span>
+                            </div>
+                            <div class="dice-face face-2">
+                                <span class="face-emoji" id="combo2Emoji2">🎲</span>
+                                <span class="face-word" id="combo2Word2">?</span>
+                            </div>
+                            <div class="dice-face face-3">
+                                <span class="face-emoji" id="combo2Emoji3">🎲</span>
+                                <span class="face-word" id="combo2Word3">?</span>
+                            </div>
+                            <div class="dice-face face-4">
+                                <span class="face-emoji" id="combo2Emoji4">🎲</span>
+                                <span class="face-word" id="combo2Word4">?</span>
+                            </div>
+                            <div class="dice-face face-5">
+                                <span class="face-emoji" id="combo2Emoji5">🎲</span>
+                                <span class="face-word" id="combo2Word5">?</span>
+                            </div>
+                            <div class="dice-face face-6">
+                                <span class="face-emoji" id="combo2Emoji6">🎲</span>
+                                <span class="face-word" id="combo2Word6">?</span>
+                            </div>
                         </div>
                     </div>
                 </div>
+
+                <!-- 骰子3 -->
                 <div class="combo-dice-wrapper">
                     <div class="combo-dice-label" id="comboLabel3">果</div>
-                    <div class="combo-dice" id="comboDice3">
-                        <div class="combo-dice-face">
-                            <span class="emoji" id="comboEmoji3">🎲</span>
-                            <span class="word" id="comboWord3">?</span>
+                    <div class="dice-container" id="comboDiceContainer3">
+                        <div class="dice" id="comboDice3">
+                            <div class="dice-face face-1">
+                                <span class="face-emoji" id="combo3Emoji1">🎲</span>
+                                <span class="face-word" id="combo3Word1">?</span>
+                            </div>
+                            <div class="dice-face face-2">
+                                <span class="face-emoji" id="combo3Emoji2">🎲</span>
+                                <span class="face-word" id="combo3Word2">?</span>
+                            </div>
+                            <div class="dice-face face-3">
+                                <span class="face-emoji" id="combo3Emoji3">🎲</span>
+                                <span class="face-word" id="combo3Word3">?</span>
+                            </div>
+                            <div class="dice-face face-4">
+                                <span class="face-emoji" id="combo3Emoji4">🎲</span>
+                                <span class="face-word" id="combo3Word4">?</span>
+                            </div>
+                            <div class="dice-face face-5">
+                                <span class="face-emoji" id="combo3Emoji5">🎲</span>
+                                <span class="face-word" id="combo3Word5">?</span>
+                            </div>
+                            <div class="dice-face face-6">
+                                <span class="face-emoji" id="combo3Emoji6">🎲</span>
+                                <span class="face-word" id="combo3Word6">?</span>
+                            </div>
                         </div>
                     </div>
                 </div>
             </div>
-            <button class="combo-roll-btn" id="comboRollBtn" onclick="rollComboDice()">🎲 摇一摇</button>
         </div>
 
         <!-- 结果展示区 -->
@@ -167,22 +239,6 @@
             <div class="result-actions">
                 <button class="btn btn-primary" onclick="copyImage()">📋 复制图片</button>
                 <button class="btn btn-secondary" onclick="rollAgain()">🎲 再摇一次</button>
-            </div>
-        </div>
-
-        <!-- 组合骰子结果区 -->
-        <div class="combo-result" id="comboResult">
-            <div class="combo-result-cards" id="comboResultCards">
-                <!-- 动态生成三个结果卡片 -->
-            </div>
-
-            <div class="combo-interpretation">
-                <div class="combo-interpretation-text" id="comboInterpretation"></div>
-            </div>
-
-            <div class="combo-result-actions">
-                <button class="btn btn-primary" onclick="copyComboImage()">📋 复制图片</button>
-                <button class="btn btn-secondary" onclick="rollComboDice()">🎲 再摇一次</button>
             </div>
         </div>
 

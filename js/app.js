@@ -452,12 +452,20 @@ function loadComboDiceFaces() {
         return;
     }
 
-    // 显示3个骰子的第一个面
+    // 为3个骰子的6个面填充数据
     for (let i = 0; i < 3; i++) {
         const subDice = combo.combo[i];
-        const face = subDice.faces[0]; // 默认显示第一个面
-        document.getElementById(`comboEmoji${i+1}`).textContent = face.emoji;
-        document.getElementById(`comboWord${i+1}`).textContent = face.word;
+        for (let j = 0; j < 6; j++) {
+            const face = subDice.faces[j];
+            document.getElementById(`combo${i+1}Emoji${j+1}`).textContent = face.emoji;
+            document.getElementById(`combo${i+1}Word${j+1}`).textContent = face.word;
+        }
+    }
+
+    // 为3个骰子容器添加点击事件
+    for (let i = 1; i <= 3; i++) {
+        const container = document.getElementById(`comboDiceContainer${i}`);
+        container.onclick = () => rollComboDice();
     }
 }
 
@@ -617,20 +625,15 @@ function rollComboDice() {
     isRolling = true;
 
     const combo = DICE_CONFIG[currentComboIndex];
-    const rollBtn = document.getElementById('comboRollBtn');
+    const hint = document.getElementById('comboDiceHint');
 
-    // 隐藏结果区
+    // 隐藏单骰子结果区
     document.getElementById('resultArea').style.display = 'none';
-    document.querySelector('.combo-result')?.classList.remove('active');
-
-    // 禁用按钮
-    rollBtn.disabled = true;
-    rollBtn.textContent = '🎲 摇骰中...';
 
     // 播放音效
     AudioController.playRoll();
 
-    // 三个骰子依次开始滚动
+    // 三个骰子元素
     const diceElements = [
         document.getElementById('comboDice1'),
         document.getElementById('comboDice2'),
@@ -664,65 +667,36 @@ function rollComboDice() {
         }, index * 200); // 每个骰子延迟200ms启动
     });
 
-    // 依次停止三个骰子（关键！要有先后顺序）
+    // 依次停止三个骰子
     diceElements.forEach((dice, index) => {
         setTimeout(() => {
             // 停止滚动
             dice.classList.remove('rolling');
 
-            // 更新骰子面显示
-            document.getElementById(`comboEmoji${index + 1}`).textContent = comboResults[index].emoji;
-            document.getElementById(`comboWord${index + 1}`).textContent = comboResults[index].word;
+            // 计算最终旋转角度，让选中的面朝上
+            const faceIndex = combo.combo[i].faces.findIndex(f => f.word === comboResults[index].word);
+            const finalRotation = calculateFinalRotation(faceIndex);
+            dice.style.transform = finalRotation;
 
-            // 播放结果音效（最后一个骰子停止时）
+            // 播放结果音效和特效（最后一个骰子停止时）
             if (index === 2) {
                 AudioController.playResult();
                 createParticles();
                 createConfetti();
 
-                // 显示结果
+                // 保存到历史
+                saveComboToHistory(comboResults, combo);
+
+                // 恢复滚动状态
                 setTimeout(() => {
-                    showComboResult(comboResults, combo);
                     isRolling = false;
-                    rollBtn.disabled = false;
-                    rollBtn.textContent = '🎲 再摇一次';
+                    hint.textContent = '点击骰子再摇一次';
                 }, 500);
             }
         }, 2000 + (index * 600)); // 第一个骰子2秒后停止，之后每个骰子延迟600ms停止
     });
-}
 
-// ========== 显示组合结果 ==========
-function showComboResult(results, combo) {
-    // 生成解签文案
-    const interpretation = generateInterpretation(results, combo);
-
-    // 更新结果卡片
-    const cardsContainer = document.getElementById('comboResultCards');
-    cardsContainer.innerHTML = results.map((result, index) => `
-        <div class="combo-result-card">
-            <div class="combo-result-label">${combo.subNames[index]}</div>
-            <div class="combo-result-emoji">${result.emoji}</div>
-            <div class="combo-result-word">${result.word}</div>
-        </div>
-    `).join('');
-
-    // 更新解签文案
-    document.getElementById('comboInterpretation').textContent = interpretation;
-
-    // 显示结果区域
-    const resultDiv = document.getElementById('comboResult');
-    resultDiv.classList.add('active');
-
-    // 滚动到结果区
-    resultDiv.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-
-    // 记录统计
-    try {
-        GlobalStatsController.recordRoll(combo.id, combo.name, results.map(r => r.word).join('+'), results.map(r => r.emoji).join('+'), interpretation);
-    } catch (e) {
-        console.warn('全局统计记录失败:', e);
-    }
+    hint.textContent = '🎲 骰子转动中...';
 }
 
 // ========== 生成解签文案 ==========
@@ -778,11 +752,6 @@ function saveComboToHistory(results, combo) {
     } catch (e) {
         console.warn('历史记录保存失败:', e);
     }
-}
-
-// ========== 复制组合骰子图片 ==========
-function copyComboImage() {
-    alert('分享功能开发中，先截图保存吧！');
 }
 
 // ========== 单骰子再摇一次 ==========
