@@ -443,32 +443,6 @@ function loadDiceFaces() {
     }
 }
 
-// ========== 加载组合骰子面 ==========
-function loadComboDiceFaces() {
-    const combo = DICE_CONFIG[currentComboIndex];
-
-    if (!combo || !combo.combo) {
-        console.error('无效的组合骰子');
-        return;
-    }
-
-    // 为3个骰子的6个面填充数据
-    for (let i = 0; i < 3; i++) {
-        const subDice = combo.combo[i];
-        for (let j = 0; j < 6; j++) {
-            const face = subDice.faces[j];
-            document.getElementById(`combo${i+1}Emoji${j+1}`).textContent = face.emoji;
-            document.getElementById(`combo${i+1}Word${j+1}`).textContent = face.word;
-        }
-    }
-
-    // 为3个骰子容器添加点击事件
-    for (let i = 1; i <= 3; i++) {
-        const container = document.getElementById(`comboDiceContainer${i}`);
-        container.onclick = () => rollComboDice();
-    }
-}
-
 // ========== 更新骰子区域 ==========
 function updateDiceArea() {
     const singleDiceArea = document.getElementById('singleDiceArea');
@@ -484,24 +458,119 @@ function updateDiceArea() {
         diceHint.textContent = `点击骰子摇一摇`;
         loadDiceFaces();
     } else if (currentMode === 'combo' && currentComboIndex >= 0) {
-        // 组合骰子模式
+        // 组合骰子模式 - 老虎机风格
         const combo = DICE_CONFIG[currentComboIndex];
         singleDiceArea.style.display = 'none';
         comboDiceArea.style.display = 'block';
         comboDiceArea.classList.add('active');
 
-        // 更新组合骰子标签
-        document.getElementById('comboLabel1').textContent = combo.subNames[0];
-        document.getElementById('comboLabel2').textContent = combo.subNames[1];
-        document.getElementById('comboLabel3').textContent = combo.subNames[2];
+        // 更新标题和标签
+        document.getElementById('slotMachineTitle').textContent = combo.name;
+        document.getElementById('reelLabel1').textContent = combo.subNames[0];
+        document.getElementById('reelLabel2').textContent = combo.subNames[1];
+        document.getElementById('reelLabel3').textContent = combo.subNames[2];
 
-        // 初始化骰子面
-        loadComboDiceFaces();
+        // 初始化滚轮数据
+        initSlotMachine();
     } else {
         singleDiceArea.style.display = 'block';
         comboDiceArea.style.display = 'none';
         comboDiceArea.classList.remove('active');
         diceHint.textContent = '请先选择骰子';
+    }
+}
+
+// ========== 初始化老虎机滚轮 ==========
+function initSlotMachine() {
+    const combo = DICE_CONFIG[currentComboIndex];
+
+    // 为每个滚轮填充数据
+    for (let i = 0; i < 3; i++) {
+        const strip = document.getElementById(`reelStrip${i + 1}`);
+        const faces = combo.combo[i].faces;
+
+        // 创建6个面的HTML
+        strip.innerHTML = faces.map(face => `
+            <div style="height: 90px; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 10px;">
+                <span style="font-size: 42px;">${face.emoji}</span>
+                <span style="font-size: 14px; font-weight: bold; color: #ffd700;">${face.word}</span>
+            </div>
+        `).join('');
+    }
+
+    // 重置结果显示
+    document.getElementById('slotMachineResult').classList.remove('show');
+    document.getElementById('interpretationText').textContent = '';
+}
+
+// ========== 老虎机摇卦 ==========
+function rollSlotMachine() {
+    if (isRolling) return;
+    isRolling = true;
+
+    const combo = DICE_CONFIG[currentComboIndex];
+    const btn = document.getElementById('slotMachineBtn');
+    const resultDiv = document.getElementById('slotMachineResult');
+
+    // 隐藏结果
+    resultDiv.classList.remove('show');
+
+    // 禁用按钮
+    btn.disabled = true;
+    btn.querySelector('.btn-text').textContent = '摇卦中...';
+
+    // 播放音效
+    AudioController.playRoll();
+
+    // 为3个滚轮随机选择结果
+    const results = [];
+    for (let i = 0; i < 3; i++) {
+        const faceIndex = Math.floor(Math.random() * 6);
+        const result = combo.combo[i].faces[faceIndex];
+        results.push({
+            ...result,
+            subName: combo.combo[i].name
+        });
+    }
+
+    // 3个滚轮同时开始滚动
+    for (let i = 1; i <= 3; i++) {
+        const strip = document.getElementById(`reelStrip${i}`);
+        strip.classList.add('spinning');
+    }
+
+    // 依次停止滚轮（关键！）
+    for (let i = 0; i < 3; i++) {
+        setTimeout(() => {
+            const strip = document.getElementById(`reelStrip${i + 1}`);
+            strip.classList.remove('spinning');
+
+            // 更新结果显示
+            document.getElementById(`reel${i + 1}Emoji`).textContent = results[i].emoji;
+            document.getElementById(`reel${i + 1}Word`).textContent = results[i].word;
+
+            // 最后一个滚轮停止后，播放音效和特效
+            if (i === 2) {
+                AudioController.playResult();
+                createParticles();
+                createConfetti();
+
+                // 显示解签
+                setTimeout(() => {
+                    const interpretation = generateInterpretation(results, combo);
+                    document.getElementById('interpretationText').textContent = interpretation;
+                    resultDiv.classList.add('show');
+
+                    // 保存到历史
+                    saveComboToHistory(results, combo);
+
+                    // 恢复按钮
+                    isRolling = false;
+                    btn.disabled = false;
+                    btn.querySelector('.btn-text').textContent = '再摇一次';
+                }, 500);
+            }
+        }, 2000 + (i * 600)); // 第一个2秒后停止，之后每个延迟600ms
     }
 }
 
@@ -621,82 +690,7 @@ function showResult(result) {
 
 // ========== 组合骰子摇骰 ==========
 function rollComboDice() {
-    if (isRolling) return;
-    isRolling = true;
-
-    const combo = DICE_CONFIG[currentComboIndex];
-    const hint = document.getElementById('comboDiceHint');
-
-    // 隐藏单骰子结果区
-    document.getElementById('resultArea').style.display = 'none';
-
-    // 播放音效
-    AudioController.playRoll();
-
-    // 三个骰子元素
-    const diceElements = [
-        document.getElementById('comboDice1'),
-        document.getElementById('comboDice2'),
-        document.getElementById('comboDice3')
-    ];
-
-    // 为3个子骰子各随机选择一个面
-    const comboResults = [];
-    for (let i = 0; i < 3; i++) {
-        const faceIndex = Math.floor(Math.random() * 6);
-        const result = combo.combo[i].faces[faceIndex];
-        comboResults.push({
-            ...result,
-            subName: combo.combo[i].name,
-            subId: combo.combo[i].subId
-        });
-    }
-
-    // 依次启动三个骰子的滚动动画
-    diceElements.forEach((dice, index) => {
-        setTimeout(() => {
-            // 添加抛起动画
-            dice.classList.add('tossing');
-
-            setTimeout(() => {
-                // 抛起完成后开始滚动
-                dice.classList.remove('tossing');
-                dice.classList.add('rolling');
-            }, 800);
-
-        }, index * 200); // 每个骰子延迟200ms启动
-    });
-
-    // 依次停止三个骰子
-    diceElements.forEach((dice, index) => {
-        setTimeout(() => {
-            // 停止滚动
-            dice.classList.remove('rolling');
-
-            // 计算最终旋转角度，让选中的面朝上
-            const faceIndex = combo.combo[i].faces.findIndex(f => f.word === comboResults[index].word);
-            const finalRotation = calculateFinalRotation(faceIndex);
-            dice.style.transform = finalRotation;
-
-            // 播放结果音效和特效（最后一个骰子停止时）
-            if (index === 2) {
-                AudioController.playResult();
-                createParticles();
-                createConfetti();
-
-                // 保存到历史
-                saveComboToHistory(comboResults, combo);
-
-                // 恢复滚动状态
-                setTimeout(() => {
-                    isRolling = false;
-                    hint.textContent = '点击骰子再摇一次';
-                }, 500);
-            }
-        }, 2000 + (index * 600)); // 第一个骰子2秒后停止，之后每个骰子延迟600ms停止
-    });
-
-    hint.textContent = '🎲 骰子转动中...';
+    rollSlotMachine();
 }
 
 // ========== 生成解签文案 ==========

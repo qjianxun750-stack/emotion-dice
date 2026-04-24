@@ -567,66 +567,266 @@ body::after {
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
-/* ========== 组合骰子区域 ========== */
+/* ========== 老虎机风格组合骰子 ========== */
 .combo-dice-area {
     display: none;
     margin: 40px 0;
-    padding: 20px;
 }
 
 .combo-dice-area.active {
     display: block;
 }
 
-.combo-dice-container {
+.slot-machine {
+    background: linear-gradient(180deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+    border-radius: 30px;
+    padding: 40px 30px;
+    box-shadow:
+        0 20px 60px rgba(0, 0, 0, 0.5),
+        inset 0 2px 0 rgba(255, 255, 255, 0.1),
+        inset 0 -2px 0 rgba(0, 0, 0, 0.2);
+    border: 4px solid #ffd700;
+    position: relative;
+    overflow: hidden;
+}
+
+.slot-machine::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 4px;
+    background: linear-gradient(90deg, transparent, #ffd700, transparent);
+    animation: shimmer 3s infinite;
+}
+
+@keyframes shimmer {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+}
+
+.slot-machine-header {
+    text-align: center;
+    margin-bottom: 30px;
+}
+
+.slot-machine-title {
+    font-size: 32px;
+    font-weight: bold;
+    color: #ffd700;
+    text-shadow:
+        0 0 10px rgba(255, 215, 0, 0.8),
+        0 0 20px rgba(255, 215, 0, 0.6),
+        0 0 30px rgba(255, 215, 0, 0.4);
+    letter-spacing: 3px;
+}
+
+.slot-machine-reels {
     display: flex;
     justify-content: center;
     align-items: center;
-    gap: 60px;
+    gap: 20px;
+    margin-bottom: 30px;
     flex-wrap: wrap;
-    margin: 40px 0;
 }
 
-.combo-dice-wrapper {
-    text-align: center;
+.reel-wrapper {
     display: flex;
     flex-direction: column;
     align-items: center;
 }
 
-.combo-dice-label {
-    font-size: 18px;
+.reel-label {
+    font-size: 24px;
     font-weight: bold;
-    color: white;
-    margin-bottom: 30px;
-    text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+    color: #ffd700;
+    margin-bottom: 15px;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.6);
     letter-spacing: 2px;
 }
 
-/* 组合骰子使用原有的骰子样式 */
-.combo-dice-wrapper .dice-container {
-    width: 140px;
-    height: 140px;
-    cursor: pointer;
+.reel {
+    width: 160px;
+    height: 180px;
+    background: linear-gradient(180deg, #0a0a0a 0%, #1a1a1a 50%, #0a0a0a 100%);
+    border-radius: 15px;
+    border: 3px solid #333;
+    box-shadow:
+        inset 0 0 20px rgba(0, 0, 0, 0.8),
+        0 4px 15px rgba(0, 0, 0, 0.5);
+    overflow: hidden;
+    position: relative;
 }
 
-.combo-dice-wrapper .dice {
-    width: 140px;
-    height: 140px;
+.reel-strip {
+    position: absolute;
+    width: 100%;
+    transition: transform 0.1s linear;
 }
 
-.combo-dice-wrapper .dice-face {
-    width: 140px;
-    height: 140px;
-    font-size: 14px;
+.reel-strip.spinning {
+    animation: spinReel 0.5s linear infinite;
 }
 
-.combo-dice-wrapper .face-emoji {
-    font-size: 52px;
+@keyframes spinReel {
+    0% { transform: translateY(0); }
+    100% { transform: translateY(-100px); }
 }
 
-.combo-dice-wrapper .face-word {
+.reel-window {
+    position: absolute;
+    top: 50%;
+    left: 0;
+    right: 0;
+    transform: translateY(-50%);
+    height: 100px;
+    background: linear-gradient(180deg,
+        rgba(0, 0, 0, 0) 0%,
+        rgba(0, 0, 0, 0.9) 20%,
+        rgba(0, 0, 0, 0.9) 80%,
+        rgba(0, 0, 0, 0) 100%
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    z-index: 10;
+}
+
+.reel-result {
+    text-align: center;
+    padding: 15px;
+}
+
+.reel-emoji {
+    font-size: 48px;
+    display: block;
+    margin-bottom: 8px;
+    filter: drop-shadow(0 0 10px rgba(255, 215, 0, 0.5));
+}
+
+.reel-word {
     font-size: 16px;
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 5px rgba(255, 215, 0, 0.5);
+    display: block;
+    line-height: 1.3;
+}
+
+/* 老虎机控制按钮 */
+.slot-machine-controls {
+    text-align: center;
+    margin-bottom: 20px;
+}
+
+.slot-machine-btn {
+    background: linear-gradient(180deg, #ffd700 0%, #ffb347 100%);
+    color: #1a1a2e;
+    border: none;
+    padding: 18px 50px;
+    font-size: 22px;
+    font-weight: bold;
+    border-radius: 50px;
+    cursor: pointer;
+    box-shadow:
+        0 6px 0 #cc8800,
+        0 10px 20px rgba(255, 215, 0, 0.4),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3);
+    transition: all 0.2s;
+    text-transform: uppercase;
+    letter-spacing: 2px;
+    display: inline-flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.slot-machine-btn:hover {
+    transform: translateY(-2px);
+    box-shadow:
+        0 8px 0 #cc8800,
+        0 15px 25px rgba(255, 215, 0, 0.5),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+.slot-machine-btn:active {
+    transform: translateY(2px);
+    box-shadow:
+        0 3px 0 #cc8800,
+        0 5px 10px rgba(255, 215, 0, 0.3),
+        inset 0 2px 0 rgba(255, 255, 255, 0.3);
+}
+
+.slot-machine-btn:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.slot-machine-btn .btn-icon {
+    font-size: 28px;
+}
+
+.slot-machine-btn .btn-text {
+    font-size: 20px;
+}
+
+/* 解签区 */
+.slot-machine-result {
+    text-align: center;
+    opacity: 0;
+    transform: translateY(20px);
+    transition: all 0.5s ease;
+}
+
+.slot-machine-result.show {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.interpretation-text {
+    background: linear-gradient(135deg, rgba(255, 215, 0, 0.1) 0%, rgba(255, 215, 0, 0.05) 100%);
+    border: 2px solid rgba(255, 215, 0, 0.3);
+    border-radius: 15px;
+    padding: 25px 30px;
+    font-size: 20px;
+    line-height: 1.8;
+    color: #ffd700;
+    text-shadow: 0 0 10px rgba(255, 215, 0, 0.3);
+}
+
+/* 响应式调整 */
+@media (max-width: 768px) {
+    .slot-machine-reels {
+        gap: 15px;
+    }
+
+    .reel {
+        width: 120px;
+        height: 150px;
+    }
+
+    .reel-emoji {
+        font-size: 38px;
+    }
+
+    .reel-word {
+        font-size: 14px;
+    }
+
+    .slot-machine-btn {
+        padding: 15px 35px;
+        font-size: 18px;
+    }
+
+    .slot-machine-title {
+        font-size: 24px;
+    }
+
+    .interpretation-text {
+        font-size: 16px;
+        padding: 20px;
+    }
 }
 
 .dice-selector {
